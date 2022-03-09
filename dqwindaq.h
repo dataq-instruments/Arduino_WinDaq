@@ -96,10 +96,35 @@
 #define DQSTR_DECA               "deca"
 #define DQSTR_MS                 "ms"
 
+#define DQSTRUCT_REV              1
+
+/*Norminal digital calibration constants*/
+#define DQDEFAUL_SCALE            37940
+#define DQDEFAUL_OFFSET           0
+
+/*Calibration constants*/
+#define DQBASE_SCALE              32768
+#define DQ_MIDPOINT               32768
+#define DQ_CEILINGP               32767
+#define DQ_CEILINGN               -32768
+#define DQ_INVERTSIGN             0x8000
+
+struct dqCal_type{
+  int structrev;
+  int hardwarerev;
+  char key [32];
+  char serial_n[32];
+  char lastCalDate[32];
+  long adc_scale[8];
+  int adc_offset[8];
+};
+
 extern int dqMatchCommand (String cmdstr);
 extern String dqGetString(char arr[]);
 extern void dqParseCommand(char cmdt[]);
 extern int dqReceiveChar(int c);
+extern int dqEEPROMInit(void);
+extern int dqDropCal(void);
 
 extern String dqCmd;
 extern String dqPar1;
@@ -109,3 +134,4 @@ extern String dqPar4;
 extern bool dqWindaq;
 extern char dqCmdStr[];
 extern bool dqScanning;
+extern dqCal_type dqCal;

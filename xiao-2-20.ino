@@ -16,10 +16,15 @@
 
 #include <TimerTC3.h>
 #include "dqwindaq.h"
+#include <FlashAsEEPROM.h>
 
 #define ADC_BUFFER 6000   
 #define ADCPacer_Timer TimerTc3 
 #define MAXADCHANNEL 8
+#define SOFTWARE_REV 0
+#define HARDWARE_REV 0
+
+//#define RELEASE
 
 int cmd_type;
 int ADCChannelCount=1;
@@ -28,9 +33,15 @@ int channellist[32]={0,1,2,3};
 int ActualChannelCount=1;
 int mode=1;
 char tchar[16];
+char eol[4] = "\r";
 float RequestedSampleRate;
 float TrueSampleRate=0.0;
 int number;
+
+long adcAve[8];
+long adcDec;
+long adcDec1;
+long adcDecCounter[8];
 
 char ADCdata[ADC_BUFFER];
 int wADCdataIdx=0;
@@ -38,8 +49,11 @@ int rADCdataIdx=0;
 bool SendS0=false;
 int ch=0;
 
+void adcPacer_isr();
+
 void setup() {
   int i;
+  uint8_t *pc =(uint8_t *)&dqCal;
 
   ADC->INPUTCTRL.bit.MUXPOS = g_APinDescription[channellist[0]].ulADCChannelNumber;                   // Set the analog input to A1, because plusPin =1?
   ADC->INPUTCTRL.bit.MUXNEG = ADC_INPUTCTRL_MUXNEG_GND_Val;
@@ -67,7 +81,30 @@ void setup() {
   ADC->CTRLA.bit.ENABLE = 1;                         // Enable the ADC
   while(ADC->STATUS.bit.SYNCBUSY);                   // Wait for synchronization
 
-  ADCPacer_Timer.initialize(1000);    // The default interval is 1000000 microseconds
+  if (!EEPROM.isValid()) {
+    dqEEPROMInit();
+    for (int i=0; i<sizeof(dqCal); i++) {
+      EEPROM.write(i, pc[i]);
+    }
+    #ifdef RELEASE
+    EEPROM.commit();
+    #endif
+            // commit() saves all the changes to EEPROM, it must be called
+            // every time the content of virtual EEPROM is changed to make
+            // the change permanent.
+            // This operation burns Flash write cycles and should not be
+            // done too often. See readme for details:
+            // https://github.com/cmaglie/FlashStorage#limited-number-of-writes
+
+    EEPROM.isValid();
+  } 
+  else{
+    for (int i=0; i<sizeof(dqCal); i++) {
+      pc[i]=EEPROM.read(i);
+    }
+  }
+
+  ADCPacer_Timer.initialize(125);    // The base burst throughput rate is 8000s/s and this is the skew between channels
   ADCPacer_Timer.attachInterrupt(adcPacer_isr);
  
   NVIC_SetPriority(TC3_IRQn, 0);    // Set the Nested Vector Interrupt Controller (NVIC) priority for the TIMER3 to 0 (highest) 
@@ -130,7 +167,33 @@ void ADC_Handler()
 
   if (ADC->INTFLAG.bit.RESRDY)                       // Check if the result ready (RESRDY) flag has been set
   { 
-    adc_reg =ADC->RESULT.reg;     
+    long fadc_reg =(unsigned long)ADC->RESULT.reg;     
+    int adc_reg;
+
+    /*digital calibration*/
+    fadc_reg = fadc_reg-DQ_MIDPOINT+(long)dqCal.adc_offset[channellist[ch]];
+    fadc_reg = fadc_reg*(long)dqCal.adc_scale[channellist[ch]];
+    fadc_reg=fadc_reg/DQBASE_SCALE;
+
+    if (fadc_reg>DQ_CEILINGP)fadc_reg=DQ_CEILINGP;
+    else if (fadc_reg<DQ_CEILINGN)fadc_reg=DQ_CEILINGN;
+
+    adcAve[ch]+=fadc_reg;
+    
+    if (adcDecCounter[ch]!=0){
+      adcDecCounter[ch]--;
+      return;
+    }
+    
+    /*We have the data now*/
+    adcDecCounter[ch]=adcDec;
+    
+    fadc_reg=adcAve[ch]/(adcDec1);
+    adcAve[ch]=0;
+   
+    adc_reg = (int)fadc_reg;
+    adc_reg=adc_reg^DQ_INVERTSIGN;
+
     if (dqWindaq) {
       if (ADCChannelIdx==0){ 
         ADCdata[wADCdataIdx++]=(adc_reg>>1)&0xFE;
@@ -182,6 +245,7 @@ void ADC_Handler()
     else{
       if (ADCChannelIdx==ActualChannelCount){
         while (ADCChannelIdx<ADCChannelCount){
+          /*Here you can add other channel to the stream*/
           if (dqWindaq){ /*Patch blank data*/
             ADCdata[wADCdataIdx++]=1;
             ADCdata[wADCdataIdx++]=1;
@@ -212,42 +276,43 @@ void ADC_Handler()
 void execCommand(int cmd)
 {
   int i;
+  uint8_t *pc =(uint8_t *)&dqCal;
   switch (cmd)
   {
-    case DQCMD_DI145A:
+    case DQCMD_DI145A: //Required by Windaq
       switch (dqPar1.toInt()){
-        case 4:
-          SerialUSB.print("0123456789ABCDEF");
+        case 1:
+          SerialUSB.print("1888");
+          break;
+        case 2:
+          SerialUSB.print("0");
           break;
         case 3:
           SerialUSB.print("00000000");
           break;
-        case 2:
-          SerialUSB.print("73");
-          break;
-        case 1:
-          SerialUSB.print("1880");
+        case 4:
+          SerialUSB.print(dqCal.key);
           break;
         case 7:
-          SerialUSB.print("604F443A");
+          SerialUSB.print(dqCal.lastCalDate);
           break;
         default:
           break;
       }
       break;
-    case DQCMD_DI145N:
-      SerialUSB.print("5BBCB20303");
+    case DQCMD_DI145N: //Required by Windaq
+      SerialUSB.print(dqCal.serial_n);
       break;
-    case DQCMD_START:
+    case DQCMD_START: //Required by Windaq
       start_stop(1);
       break;
-    case DQCMD_STOP:
+    case DQCMD_STOP: //Required by Windaq
       start_stop(0);
       break;      
-    case DQCMD_DI145S:
+    case DQCMD_DI145S: //Required by Windaq
       start_stop (dqPar1.toInt());
       break;
-    case DQCMD_SAMPLERATE:
+    case DQCMD_SAMPLERATE: //Required by Windaq
       if (dqPar1.length ()==0){
         SerialUSB.print(dqCmd+" "+ String(TrueSampleRate, 6));
       }
@@ -256,7 +321,7 @@ void execCommand(int cmd)
         TrueSampleRate=findTrueSampleRate(RequestedSampleRate);
       }
       break;  
-    case DQCMD_SLIST:
+    case DQCMD_SLIST: //Required by Windaq
       if (dqPar1.length ()==0){
         SerialUSB.print(ADCChannelCount);
         break;
@@ -286,6 +351,28 @@ void execCommand(int cmd)
       }    
       mode=dqPar1.toInt()&0xff;
       break;
+    case DQCMD_INFO:
+      if (dqPar1.length ()==0){
+        break;
+      }
+      i=dqPar1.toInt();
+      switch(i){
+        case 0: //Required by Windaq
+          SerialUSB.println("DATAQ");
+          break;
+        case 1: //Required by Windaq 
+          SerialUSB.println("1888");
+          break;
+        case 2: //Required by Windaq
+          SerialUSB.println(SOFTWARE_REV);
+        case 3: //Required by Windaq
+          SerialUSB.println(HARDWARE_REV);
+        case 6: //Required by Windaq
+          SerialUSB.println(dqCal.serial_n); 
+          break;
+        default:
+          break;
+      }
     default:
       break;
   }
@@ -318,34 +405,25 @@ void start_stop(int i){
 
 float findTrueSampleRate (float f)
 {
-  /*We set the max throughput rate at 10K, higher than this we should adjust ADC configuration*/
+  /*Use software AVE instead of buildin hardware AVE to minimize skew between channels*/
   float r=0.0;
-  if (f<0.01)f=0.01;
-  int MyAvg=ADC_AVGCTRL_SAMPLENUM_16;
-  long temp=(long)(1000000./(f*(float)ADCChannelCount));
+  int i;
+  if (f<0.2)f=0.2;
 
-  if (temp<80.)temp=80;
-  if (temp>100000000.)temp=100000000;
+  long temp=(long)(8000./(f*(float)ADCChannelCount));
 
-  ADC->CTRLB.reg = ADC_CTRLB_PRESCALER_DIV16 |       // Divide Clock ADC GCLK (48Mhz) by a prescaler of 16 (48MHz/16 = 3 MHz), 
-                  ADC_CTRLB_RESSEL_16BIT;           // Set the ADC resolution to 16 bits
-  while(ADC->STATUS.bit.SYNCBUSY);                   // Wait for synchronization  
+  if (temp<1)temp=1;
+  if (temp>60000)temp=60000;
 
-  if (temp<=100) MyAvg=ADC_AVGCTRL_SAMPLENUM_16;
-  else if (temp<200) MyAvg=ADC_AVGCTRL_SAMPLENUM_32;
-  else if (temp<400) MyAvg=ADC_AVGCTRL_SAMPLENUM_64;
-  else if (temp<800) MyAvg=ADC_AVGCTRL_SAMPLENUM_128;
-  else if (temp<1600) MyAvg=ADC_AVGCTRL_SAMPLENUM_256;  
-  else if (temp<3200) MyAvg=ADC_AVGCTRL_SAMPLENUM_512;
-  else MyAvg=ADC_AVGCTRL_SAMPLENUM_1024;
+  r=8000/(((float)adcDec*(float)ADCChannelCount));
 
-  ADC->AVGCTRL.reg = MyAvg |      
-                    ADC_AVGCTRL_ADJRES(8);
-  while(ADC->STATUS.bit.SYNCBUSY);                   // Wait for synchronization  
-  
-  //ADCPacer_Timer.initialize(100);    // The default interval is 1000000 microseconds
-  ADCPacer_Timer.initialize(temp);    // The default interval is 1000000 microseconds
-  r=1000000./((float)temp*(float)ADCChannelCount);
+  adcDec1=temp;
+  temp=temp-1;
+  for (i=0; i<MAXADCHANNEL; i++){ 
+    adcAve[i]=0;
+    adcDecCounter[i]=temp;
+  }
+  adcDec=temp;
 
   return (float)r;
 }

@@ -16,6 +16,7 @@
 
 #include <Arduino.h>
 #include "dqwindaq.h"
+#include <FlashAsEEPROM.h>
 
 String dqCmd;
 String dqPar1;
@@ -28,6 +29,38 @@ bool dqScanning=false;
 
 static int state=0;
 static int cmdStrindex=0;
+dqCal_type dqCal;
+
+int dqEEPROMInit(void)
+{
+  int i;
+  dqCal.structrev=DQSTRUCT_REV;  
+  dqCal.hardwarerev=0;
+  sprintf(dqCal.key, "0123456789ABCDEF"); //required by Windaq
+  sprintf(dqCal.serial_n, "8888888888");  //required by Windaq
+  sprintf(dqCal.lastCalDate, "6214F19E"); //2022/2/22: 2:22:22
+
+  for (i=0; i<8; i++){
+    dqCal.adc_scale[i]=DQDEFAUL_SCALE;
+    dqCal.adc_offset[i]=DQDEFAUL_OFFSET;
+  }
+}
+
+/*This is to be used to find out the true scale/offset*/
+int dqDropCal(void)
+{
+  int i;
+  uint8_t *pc =(uint8_t *)&dqCal;
+
+  for (int i=0; i<sizeof(dqCal); i++) {
+    pc[i]=EEPROM.read(i);
+  }
+
+  for (i=0; i<8; i++){
+    dqCal.adc_scale[i]=DQBASE_SCALE;
+    dqCal.adc_offset[i]=0;
+  }
+}
 
 int dqReceiveChar (int c)
 {
