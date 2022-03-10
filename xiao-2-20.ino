@@ -34,8 +34,8 @@ int ActualChannelCount=1;
 int mode=1;
 char tchar[16];
 char eol[4] = "\r";
-float RequestedSampleRate;
-float TrueSampleRate=0.0;
+float RequestedSampleRate=1.0;
+float TrueSampleRate=1.0;
 int number;
 
 long adcAve[8];
@@ -106,6 +106,8 @@ void setup() {
 
   ADCPacer_Timer.initialize(125);    // The base burst throughput rate is 8000s/s and this is the skew between channels
   ADCPacer_Timer.attachInterrupt(adcPacer_isr);
+
+  findTrueSampleRate(RequestedSampleRate);
  
   NVIC_SetPriority(TC3_IRQn, 0);    // Set the Nested Vector Interrupt Controller (NVIC) priority for the TIMER3 to 0 (highest) 
   
@@ -128,7 +130,10 @@ void loop() {
     if (dqReceiveChar (SerialUSB.read())==DQCMD_AVAILABLE){
       dqParseCommand(dqCmdStr);
       cmd_type= dqMatchCommand(dqCmd);
-      if (cmd_type>DQCMD_NOP) execCommand(cmd_type);
+      if (cmd_type>DQCMD_NOP) 
+        execCommand(cmd_type);
+      else 
+        SerialUSB.println("Invalid command");
     }
   }
 
@@ -190,9 +195,14 @@ void ADC_Handler()
     
     fadc_reg=adcAve[ch]/(adcDec1);
     adcAve[ch]=0;
-   
-    adc_reg = (int)fadc_reg;
-    adc_reg=adc_reg^DQ_INVERTSIGN;
+    
+    if (dqWindaq){
+      adc_reg = (int)fadc_reg;
+      adc_reg=adc_reg^DQ_INVERTSIGN;
+    }
+    else{
+      adc_reg = (int)fadc_reg;
+    }
 
     if (dqWindaq) {
       if (ADCChannelIdx==0){ 
@@ -297,6 +307,7 @@ void execCommand(int cmd)
           SerialUSB.print(dqCal.lastCalDate);
           break;
         default:
+          SerialUSB.println("Invalid parameter");
           break;
       }
       break;
@@ -312,7 +323,8 @@ void execCommand(int cmd)
     case DQCMD_DI145S: //Required by Windaq
       start_stop (dqPar1.toInt());
       break;
-    case DQCMD_SAMPLERATE: //Required by Windaq
+    case DQCMD_RSAMPLERATE:   //Required by Windaq
+    case DQCMD_SAMPLERATE: 
       if (dqPar1.length ()==0){
         SerialUSB.print(dqCmd+" "+ String(TrueSampleRate, 6));
       }
@@ -371,9 +383,12 @@ void execCommand(int cmd)
           SerialUSB.println(dqCal.serial_n); 
           break;
         default:
+          SerialUSB.println("Invalid parameter");
           break;
       }
+      break;
     default:
+      SerialUSB.println("Unsupported command");
       break;
   }
 }
@@ -415,7 +430,7 @@ float findTrueSampleRate (float f)
   if (temp<1)temp=1;
   if (temp>60000)temp=60000;
 
-  r=8000/(((float)adcDec*(float)ADCChannelCount));
+  r=8000/(((float)temp*(float)ADCChannelCount));
 
   adcDec1=temp;
   temp=temp-1;

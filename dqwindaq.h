@@ -25,6 +25,7 @@
 #define DQCMD_SR                 0x05
 #define DQCMD_DEC                0x09
 #define DQCMD_FILTER             0x0A
+#define DQCMD_RSAMPLERATE        0x25  
 #define DQCMD_SAMPLERATE         0x26  
 #define DQCMD_DI145A             0x27  
 #define DQCMD_DI145B             0x28  
