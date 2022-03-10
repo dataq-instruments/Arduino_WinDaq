@@ -8,7 +8,8 @@ External library is needed to build the sketch, download the zip file and import
 https://github.com/cmaglie/FlashStorage
 
 Make sure to use the latest DICOM100.EXE
-DICOMMNT.EXE  needs to set RTS and DTE true to make serial class under arduino work 
+
+DICOMMNT.EXE needs to set RTS and DTE true to make serial class under arduino work 
 
 Here are some helpful info if you want to know more about codes
 
