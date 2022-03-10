@@ -79,6 +79,7 @@ int dqReceiveChar (int c)
 
     switch(state){
       case 0:
+        if (c==0xA)break; //Ignore LF
         dqCmdStr[cmdStrindex++]=c;
         dqCmdStr[cmdStrindex]='\0';
         if (c==0xD){
@@ -168,8 +169,10 @@ int dqMatchCommand(String dqCmd){
 		else if (dqCmd ==DQSTR_STOP       ) command = DQCMD_STOP;
 		else if (dqCmd ==DQSTR_SLIST      ) command = DQCMD_SLIST;
 		else if (dqCmd ==DQSTR_SRATE      ) command = DQCMD_SAMPLERATE;
+    else if (dqCmd ==DQSTR_RRATE      ) command = DQCMD_SAMPLERATE;
 		else if (dqCmd ==DQSTR_FILTER     ) command = DQCMD_FILTER;
 		else if (dqCmd ==DQSTR_SAMPLERATE) command = DQCMD_SAMPLERATE;
+    else if (dqCmd ==DQSTR_RSAMPLERATE) command = DQCMD_SAMPLERATE;
 		else if (dqCmd ==DQSTR_FILTER) command = DQCMD_FILTER;
 		else if (dqCmd ==DQSTR_DI145A) command = DQCMD_DI145A;
 		else if (dqCmd ==DQSTR_DI145B) command = DQCMD_DI145B;
