@@ -1,9 +1,9 @@
 # Arduino_WinDaq
-Use Seeed Studion's XIAO module in WinDaq. 
+Use Seeed Studio's Seeeduino XIAO module to stream ADC waveform to WinDaq. 
 
-This is an on-going project, no true Windaq support yet
+This is an on-going project, final Windaq support has not been released yet
 
-External lib is needed to build the sketch, download the zip file and import to Arduino IDE
+External library is needed to build the sketch, download the zip file and import to Arduino IDE
 
 https://github.com/cmaglie/FlashStorage
 
