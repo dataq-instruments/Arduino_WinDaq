@@ -1,5 +1,5 @@
 # Arduino_WinDaq
-Use Seeeduino XIAO module for WinDaq. 
+Use Seeed Studion's XIAO module in WinDaq. 
 
 This is an on-going project, no true Windaq support yet
 
