@@ -1,5 +1,5 @@
 # Arduino_WinDaq
-Use Seeed Studio's Seeeduino XIAO module to stream ADC waveform to WinDaq. 
+Use Seeed Studio's Seeeduino XIAO module to stream analog waveforms to WinDaq. It supports up to 11 channels, with 4 analog input channels and 4 reserved channels to accept readings from sensors connected to grove connectors
 
 This is an on-going project, final Windaq support has not been released yet
 
