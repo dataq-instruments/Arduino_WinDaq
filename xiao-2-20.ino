@@ -32,7 +32,7 @@ int ADCChannelIdx=0;
 int channellist[32]={0,1,2,3};
 int ActualChannelCount=1;
 int mode=1;
-char tchar[16];
+char tchar[32];
 char eol[4] = "\r";
 float RequestedSampleRate=1.0;
 float TrueSampleRate=1.0;
@@ -132,8 +132,9 @@ void loop() {
       cmd_type= dqMatchCommand(dqCmd);
       if (cmd_type>DQCMD_NOP) 
         execCommand(cmd_type);
-      else 
-        SerialUSB.println("Invalid command");
+      else{
+        SerialUSB.print("Unknown command");
+      }
     }
   }
 
@@ -187,96 +188,101 @@ void ADC_Handler()
     
     if (adcDecCounter[ch]!=0){
       adcDecCounter[ch]--;
-      return;
-    }
-    
-    /*We have the data now*/
-    adcDecCounter[ch]=adcDec;
-    
-    fadc_reg=adcAve[ch]/(adcDec1);
-    adcAve[ch]=0;
-    
-    if (dqWindaq){
-      adc_reg = (int)fadc_reg;
-      adc_reg=adc_reg^DQ_INVERTSIGN;
+      ch++;
+      if (ch==ActualChannelCount)ch=0;
+      ADC->INPUTCTRL.bit.MUXPOS = g_APinDescription[channellist[ch]].ulADCChannelNumber;  
     }
     else{
-      adc_reg = (int)fadc_reg;
-    }
-
-    if (dqWindaq) {
-      if (ADCChannelIdx==0){ 
-        ADCdata[wADCdataIdx++]=(adc_reg>>1)&0xFE;
-        ADCdata[wADCdataIdx++]=(adc_reg>>8)|1;
+      /*We have the data now*/
+      adcDecCounter[ch]=adcDec;
+      
+      fadc_reg=adcAve[ch]/(adcDec1);
+      adcAve[ch]=0;
+      
+      if (dqWindaq){
+        adc_reg = (int)fadc_reg;
+        adc_reg=adc_reg^DQ_INVERTSIGN;
       }
       else{
-        ADCdata[wADCdataIdx++]=(adc_reg>>1)|1;
-        ADCdata[wADCdataIdx++]=(adc_reg>>8)|1;
+        adc_reg = (int)fadc_reg;
       }
-      if (wADCdataIdx>=ADC_BUFFER) wADCdataIdx=0;
-   }
-    else{
-      switch (mode){
-      case 0:
-        ADCdata[wADCdataIdx++]=adc_reg&0xFF;
-        ADCdata[wADCdataIdx++]=adc_reg>>8;
-        if (wADCdataIdx>=ADC_BUFFER) wADCdataIdx=0;
-        break;
-      case 0x80:
-        ADCdata[wADCdataIdx++]=adc_reg>>8;
-        ADCdata[wADCdataIdx++]=adc_reg&0xFF;
-        if (wADCdataIdx>=ADC_BUFFER) wADCdataIdx=0;
-        break;
-      default:
+
+      if (dqWindaq) {
         if (ADCChannelIdx==0){ 
-          sprintf(tchar, "\n%d ", adc_reg);
+          ADCdata[wADCdataIdx++]=(adc_reg>>1)&0xFE;
+          ADCdata[wADCdataIdx++]=(adc_reg>>8)|1;
         }
         else{
-          sprintf(tchar, "%d ", adc_reg);
+          ADCdata[wADCdataIdx++]=(adc_reg>>1)|1;
+          ADCdata[wADCdataIdx++]=(adc_reg>>8)|1;
         }
-        i=strlen(tchar);
-        for (j =0; j<i; j++){
-          ADCdata[wADCdataIdx++]=tchar[j];
-          if (wADCdataIdx>=ADC_BUFFER) wADCdataIdx=0;
-        }
-        break;
+        if (wADCdataIdx>=ADC_BUFFER) wADCdataIdx=0;
       }
-    }
-
-    ch++;
-    if (ch==ActualChannelCount)ch=0;
-
-    ADC->INPUTCTRL.bit.MUXPOS = g_APinDescription[channellist[ch]].ulADCChannelNumber;  //
-
-    ADCChannelIdx++;
-
-    if (ADCChannelIdx==ADCChannelCount)
-      ADCChannelIdx=0;
-    else{
-      if (ADCChannelIdx==ActualChannelCount){
-        while (ADCChannelIdx<ADCChannelCount){
-          /*Here you can add other channel to the stream*/
-          if (dqWindaq){ /*Patch blank data*/
-            ADCdata[wADCdataIdx++]=1;
-            ADCdata[wADCdataIdx++]=1;
-            if (wADCdataIdx>=ADC_BUFFER) wADCdataIdx=0;
+      else{
+        switch (mode){
+        case 0:
+          ADCdata[wADCdataIdx++]=adc_reg&0xFF;
+          ADCdata[wADCdataIdx++]=adc_reg>>8;
+          if (wADCdataIdx>=ADC_BUFFER) wADCdataIdx=0;
+          break;
+        case 0x80:
+          ADCdata[wADCdataIdx++]=adc_reg>>8;
+          ADCdata[wADCdataIdx++]=adc_reg&0xFF;
+          if (wADCdataIdx>=ADC_BUFFER) wADCdataIdx=0;
+          break;
+        default:
+          if (ADCChannelIdx==0){ 
+            //sprintf(tchar, "\n%d ", adc_reg);
+            sprintf(tchar, "\n%d", adc_reg);
           }
           else{
-            if ((mode&0x7f)==0){
-              ADCdata[wADCdataIdx++]=0;
-              ADCdata[wADCdataIdx++]=0;
+            //sprintf(tchar, "%d ", adc_reg);
+            sprintf(tchar, " %d", adc_reg);
+          }
+          i=strlen(tchar);
+          for (j =0; j<i; j++){
+            ADCdata[wADCdataIdx++]=tchar[j];
+            if (wADCdataIdx>=ADC_BUFFER) wADCdataIdx=0;
+          }
+          break;
+        }
+      }
+
+      ch++;
+      if (ch==ActualChannelCount)ch=0;
+
+      ADC->INPUTCTRL.bit.MUXPOS = g_APinDescription[channellist[ch]].ulADCChannelNumber;  //
+
+      ADCChannelIdx++;
+
+      if (ADCChannelIdx==ADCChannelCount)
+        ADCChannelIdx=0;
+      else{
+        if (ADCChannelIdx==ActualChannelCount){
+          while (ADCChannelIdx<ADCChannelCount){
+            /*Here you can add other channel to the stream*/
+            if (dqWindaq){ /*Patch blank data*/
+              ADCdata[wADCdataIdx++]=1;
+              ADCdata[wADCdataIdx++]=1;
               if (wADCdataIdx>=ADC_BUFFER) wADCdataIdx=0;
             }
-            else{ /*No need to patch for ASCII format*/  
+            else{
+              if ((mode&0x7f)==0){
+                ADCdata[wADCdataIdx++]=0;
+                ADCdata[wADCdataIdx++]=0;
+                if (wADCdataIdx>=ADC_BUFFER) wADCdataIdx=0;
+              }
+              else{ /*No need to patch for ASCII format*/  
+              }
             }
+
+            ADCChannelIdx++;
           }
-
-          ADCChannelIdx++;
+          ADCChannelIdx=0;
         }
-        ADCChannelIdx=0;
-      }
+      }      
     }
-
+    
     ADC->INTFLAG.bit.RESRDY = 0;                     // Clear the RESRDY flag
     while(ADC->STATUS.bit.SYNCBUSY);                 // Wait for read synchronization
   }
@@ -307,7 +313,7 @@ void execCommand(int cmd)
           SerialUSB.print(dqCal.lastCalDate);
           break;
         default:
-          SerialUSB.println("Invalid parameter");
+          SerialUSB.print("Invalid parameter");
           break;
       }
       break;
@@ -386,6 +392,8 @@ void execCommand(int cmd)
           SerialUSB.println("Invalid parameter");
           break;
       }
+      break;
+    case DQCMD_DI145E: //Required by Windaq
       break;
     default:
       SerialUSB.println("Unsupported command");

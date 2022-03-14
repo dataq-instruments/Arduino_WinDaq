@@ -31,6 +31,7 @@
 #define DQCMD_DI145B             0x28  
 #define DQCMD_DI145C             0x29  
 #define DQCMD_DI145D             0x2A  
+#define DQCMD_DI145E             0x24  
 #define DQCMD_DI145L             0x2B	
 #define DQCMD_DI145M             0x2C  
 #define DQCMD_DI145N             0x2D  
@@ -76,6 +77,7 @@
 #define DQSTR_DI145B             "B"
 #define DQSTR_DI145C             "C"
 #define DQSTR_DI145D             "D"
+#define DQSTR_DI145E             "E"
 #define DQSTR_DI145L             "L"
 #define DQSTR_DI145M             "M"
 #define DQSTR_DI145N             "N"

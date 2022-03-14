@@ -164,7 +164,7 @@ void dqParseCommand(char cmdt[]){
 
 int dqMatchCommand(String dqCmd){
     int command;
-    if      (dqCmd == DQSTR_INFO) command = DQCMD_INFO;
+    if (dqCmd == DQSTR_INFO) command = DQCMD_INFO;
 		else if (dqCmd ==DQSTR_START      ) command = DQCMD_START;
 		else if (dqCmd ==DQSTR_STOP       ) command = DQCMD_STOP;
 		else if (dqCmd ==DQSTR_SLIST      ) command = DQCMD_SLIST;
@@ -178,6 +178,7 @@ int dqMatchCommand(String dqCmd){
 		else if (dqCmd ==DQSTR_DI145B) command = DQCMD_DI145B;
 		else if (dqCmd ==DQSTR_DI145C) command = DQCMD_DI145C;
 		else if (dqCmd ==DQSTR_DI145D) command = DQCMD_DI145D;
+		else if (dqCmd ==DQSTR_DI145E) command = DQCMD_DI145E;
 		else if (dqCmd ==DQSTR_DI145L) command = DQCMD_DI145L;
 		else if (dqCmd ==DQSTR_DI145M) command = DQCMD_DI145M;
 		else if (dqCmd ==DQSTR_DI145N) command = DQCMD_DI145N;
