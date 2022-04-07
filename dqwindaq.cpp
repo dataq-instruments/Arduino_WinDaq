@@ -198,6 +198,8 @@ int dqMatchCommand(String dqCmd){
 		else if (dqCmd ==DQSTR_NOP) command = DQCMD_NOP;
 		else if (dqCmd ==DQSTR_RANGE) command = DQCMD_RANGE;
 		else if (dqCmd ==DQSTR_EOL) command = DQCMD_EOL;
+		else if (dqCmd ==DQSTR_WFLASH) command = DQCMD_WFLASH;
+    else if (dqCmd ==DQSTR_RFLASH) command = DQCMD_RFLASH;
     else command=DQCMD_INVALID;
     return command;
 }

@@ -49,6 +49,8 @@
 #define DQCMD_CHNS               0x39 
 #define DQCMD_ENCODE             0x3A 
 #define DQCMD_PGA                0x3B  
+#define DQCMD_RFLASH	  	       0x3C  
+#define DQCMD_WFLASH	  	       0x3D  
 #define DQCMD_DEBUG              0x51
 #define DQCMD_YMD                0x52
 #define DQCMD_HMS                0x53
@@ -100,6 +102,8 @@
 #define DQSTR_EOL                "eol"
 #define DQSTR_DECA               "deca"
 #define DQSTR_MS                 "ms"
+#define DQSTR_WFLASH   	  	     "writeflash"	
+#define DQSTR_RFLASH   	  	     "readflash"	
 
 #define DQSTRUCT_REV              1
 
@@ -114,14 +118,15 @@
 #define DQ_CEILINGN               -32768
 #define DQ_INVERTSIGN             0x8000
 
+
 struct dqCal_type{
-  int structrev;
-  int hardwarerev;
+  unsigned short structrev; 
+  unsigned short hardwarerev;
   char key [32];
   char serial_n[32];
   char lastCalDate[32];
-  long adc_scale[8];
-  int adc_offset[8];
+  short adc_scale[8];
+  short adc_offset[8];
 };
 
 extern int dqMatchCommand (String cmdstr);

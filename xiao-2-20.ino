@@ -47,7 +47,7 @@ char ADCdata[ADC_BUFFER];
 int wADCdataIdx=0;
 int rADCdataIdx=0;
 bool SendS0=false;
-int ch=0;
+int ch=0x1000;
 
 void adcPacer_isr();
 
@@ -58,6 +58,7 @@ void setup() {
   ADC->INPUTCTRL.bit.MUXPOS = g_APinDescription[channellist[0]].ulADCChannelNumber;                   // Set the analog input to A1, because plusPin =1?
   ADC->INPUTCTRL.bit.MUXNEG = ADC_INPUTCTRL_MUXNEG_GND_Val;
   ADC->REFCTRL.bit.REFSEL=ADC_REFCTRL_REFSEL_INTVCC1_Val;
+  //ADC->REFCTRL.bit.REFSEL=ADC_REFCTRL_REFSEL_INT1V_Val;
   
   ADC->INPUTCTRL.bit.GAIN =ADC_INPUTCTRL_GAIN_DIV2_Val; //default is 1/2 gain
   ADC->INPUTCTRL.bit.INPUTOFFSET =0; //Watch out, this is NOT the offset adjustment for ADC reading!
@@ -86,9 +87,9 @@ void setup() {
     for (int i=0; i<sizeof(dqCal); i++) {
       EEPROM.write(i, pc[i]);
     }
-    #ifdef RELEASE
+    //#ifdef RELEASE
     EEPROM.commit();
-    #endif
+    //#endif
             // commit() saves all the changes to EEPROM, it must be called
             // every time the content of virtual EEPROM is changed to make
             // the change permanent.
@@ -125,6 +126,7 @@ void adcPacer_isr() {
 
 void loop() {
   int i;
+  uint8_t *pc =(uint8_t *)&dqCal;
 
   while (SerialUSB.available()){
     if (dqReceiveChar (SerialUSB.read())==DQCMD_AVAILABLE){
@@ -325,6 +327,7 @@ void execCommand(int cmd)
       break;
     case DQCMD_STOP: //Required by Windaq
       start_stop(0);
+      SerialUSB.print(dqCmd);
       break;      
     case DQCMD_DI145S: //Required by Windaq
       start_stop (dqPar1.toInt());
@@ -395,6 +398,36 @@ void execCommand(int cmd)
       break;
     case DQCMD_DI145E: //Required by Windaq
       break;
+    case DQCMD_WFLASH:  
+      if (dqPar1.length ()>0){
+        i=dqPar1.toInt();
+        if ((i>=2)&&(i<sizeof(dqCal))){ /*The first two bytes are structure rev*/
+          if(dqPar2.length ()>0){
+            pc[i]=(uint8_t)dqPar2.toInt()&0xff;
+          }
+        }
+        else if (i==-1){
+          SerialUSB.print("Flash updating...");
+          for (i=0; i<sizeof(dqCal); i++) {
+            EEPROM.write(i, pc[i]);
+          }
+          EEPROM.commit();
+          SerialUSB.println("Done");
+        }
+      }
+      break;
+    case DQCMD_RFLASH:
+      if (dqPar1.length ()>0){
+        for (int i=0; i<sizeof(dqCal); i++) {
+          pc[i]=EEPROM.read(i);
+        }
+      }
+      for (int i=0; i<sizeof(dqCal); i++) {
+        SerialUSB.print(" ");
+        SerialUSB.print(pc[i]);
+      }
+      SerialUSB.print("\r");
+      break;
     default:
       SerialUSB.println("Unsupported command");
       break;
@@ -422,7 +455,6 @@ void start_stop(int i){
   }
   else{
     NVIC_DisableIRQ(ADC_IRQn);         // Connect the ADC to Nested Vector Interrupt Controller (NVIC)
-    SendS0=true;
   }
 }
 
