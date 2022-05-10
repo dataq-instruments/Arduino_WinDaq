@@ -1,4 +1,4 @@
-# Open Source_WinDaq
+# Arduino_To_WinDaq
 This is an open source project that basically can make any Arduino® or Arduino®-compatible module (Seeed Studio's Seeeduino XIAO is used as basic example) to stream analog waveforms to WinDaq. It supports up to 11 channels, with 4 analog input channels and 8 reserved channels to accept readings from sensors connected to grove connectors
 
 This is an on-going project, final Windaq support has not been released yet
