@@ -9,5 +9,5 @@ DICOMMNT.EXE needs to set RTS and DTE true to make serial class under Arduino® 
 
 The major difference between Seeeduino XIAO and Arduino ZERO is their Analog input pins
 
-![image] <img src="http://cdn.shopify.com/s/files/1/0506/1689/3647/products/ABX00003_01.iso_d6dab5cd-56ad-4eb2-8381-bc1ea6de29fb_866x686.jpg" width="100" height="100">
+![alt text] <img src="http://cdn.shopify.com/s/files/1/0506/1689/3647/products/ABX00003_01.iso_d6dab5cd-56ad-4eb2-8381-bc1ea6de29fb_866x686.jpg" width="300" height="300">
 ![alt text](http://cdn.shopify.com/s/files/1/0506/1689/3647/products/ABX00003_01.iso_d6dab5cd-56ad-4eb2-8381-bc1ea6de29fb_866x686.jpg)
