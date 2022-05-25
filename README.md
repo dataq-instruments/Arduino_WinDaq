@@ -3,8 +3,6 @@ This is an open source project that can make any **Arduino®** (Arduino Zero is 
 
 This is an on-going project, final Windaq support has not been released yet
 
-External library may be needed to build the sketch, download the zip file and import to Arduino IDE
-
 Make sure to use the latest DICOM100.EXE
 
 DICOMMNT.EXE needs to set RTS and DTE true to make serial class under Arduino® work 
