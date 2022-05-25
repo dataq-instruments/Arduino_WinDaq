@@ -9,3 +9,4 @@ Make sure to use the latest DICOM100.EXE
 
 DICOMMNT.EXE needs to set RTS and DTE true to make serial class under Arduino® work 
 
+The major difference between Seeeduino XIAO and Arduino ZERO is their Analog input pins
