@@ -18,25 +18,41 @@
 #include "dqwindaq.h"
 #include <FlashAsEEPROM.h>
 
-#define ADC_BUFFER 6000   
+#define ADC_BUFFER 5000   
 #define ADCPacer_Timer TimerTc3 
 #define MAXADCHANNEL 8
 #define SOFTWARE_REV 0
 #define HARDWARE_REV 0
 
+#define ALLOW_IMD    1
+
 //#define RELEASE
+
+// See SAMD21 datasheet, section "10.3.3 Serial Number"
+#define SERNO0 ((uint32_t *)0x0080a00c)
+#define SERNO1t3 ((uint32_t *)0x0080a040)
+
+uint32_t samd21_serno[4];
+
+void get_samd21_serno(uint32_t s[4]) {
+  s[0] = *SERNO0;
+  s[1] = SERNO1t3[0];
+  s[2] = SERNO1t3[1];
+  s[3] = SERNO1t3[2];
+}
 
 int cmd_type;
 int ADCChannelCount=1;
 int ADCChannelIdx=0;
 int channellist[32]={0,1,2,3};
-int ActualChannelCount=1;
+int ActualChannelCount=4;
 int mode=1;
 char tchar[32];
 char eol[4] = "\r";
 float RequestedSampleRate=1.0;
 float TrueSampleRate=1.0;
 int number;
+int cnn=0;
 
 long adcAve[8];
 long adcDec;
@@ -44,12 +60,17 @@ long adcDec1;
 long adcDecCounter[8];
 
 char ADCdata[ADC_BUFFER];
+
+//#ifdef ALLOW_IMD  
+int ImdADCdata[32];
+//#endif 
 int wADCdataIdx=0;
 int rADCdataIdx=0;
 bool SendS0=false;
 int ch=0x1000;
 
 void adcPacer_isr();
+float findTrueSampleRate (float f);
 
 void setup() {
   int i;
@@ -105,12 +126,15 @@ void setup() {
     }
   }
 
+  findTrueSampleRate(4000);
   ADCPacer_Timer.initialize(125);    // The base burst throughput rate is 8000s/s and this is the skew between channels
   ADCPacer_Timer.attachInterrupt(adcPacer_isr);
 
   findTrueSampleRate(RequestedSampleRate);
  
   NVIC_SetPriority(TC3_IRQn, 0);    // Set the Nested Vector Interrupt Controller (NVIC) priority for the TIMER3 to 0 (highest) 
+
+  pinMode(9, OUTPUT); //Use A9 as digital ouptut
   
   SerialUSB.begin(115200);
 
@@ -120,7 +144,9 @@ void setup() {
 }
 
 void adcPacer_isr() { 
+  //#ifndef ALLOW_IMD
   if  (dqScanning)
+  //#endif
     ADC->SWTRIG.bit.START = 1;                         // Initiate a software trigger to start an ADC conversion
 }
 
@@ -135,7 +161,7 @@ void loop() {
       if (cmd_type>DQCMD_NOP) 
         execCommand(cmd_type);
       else{
-        SerialUSB.print("Unknown command");
+        if  (dqScanning==0) SerialUSB.print("Unknown command");
       }
     }
   }
@@ -199,8 +225,11 @@ void ADC_Handler()
       adcDecCounter[ch]=adcDec;
       
       fadc_reg=adcAve[ch]/(adcDec1);
+
       adcAve[ch]=0;
-      
+
+      ImdADCdata[ch]=fadc_reg;
+
       if (dqWindaq){
         adc_reg = (int)fadc_reg;
         adc_reg=adc_reg^DQ_INVERTSIGN;
@@ -221,32 +250,33 @@ void ADC_Handler()
         if (wADCdataIdx>=ADC_BUFFER) wADCdataIdx=0;
       }
       else{
-        switch (mode){
-        case 0:
-          ADCdata[wADCdataIdx++]=adc_reg&0xFF;
-          ADCdata[wADCdataIdx++]=adc_reg>>8;
-          if (wADCdataIdx>=ADC_BUFFER) wADCdataIdx=0;
-          break;
-        case 0x80:
-          ADCdata[wADCdataIdx++]=adc_reg>>8;
-          ADCdata[wADCdataIdx++]=adc_reg&0xFF;
-          if (wADCdataIdx>=ADC_BUFFER) wADCdataIdx=0;
-          break;
-        default:
-          if (ADCChannelIdx==0){ 
-            //sprintf(tchar, "\n%d ", adc_reg);
-            sprintf(tchar, "\n%d", adc_reg);
-          }
-          else{
-            //sprintf(tchar, "%d ", adc_reg);
-            sprintf(tchar, " %d", adc_reg);
-          }
-          i=strlen(tchar);
-          for (j =0; j<i; j++){
-            ADCdata[wADCdataIdx++]=tchar[j];
+        if (dqStream){
+
+          switch (mode){
+          case 0:
+            ADCdata[wADCdataIdx++]=adc_reg&0xFF;
+            ADCdata[wADCdataIdx++]=adc_reg>>8;
             if (wADCdataIdx>=ADC_BUFFER) wADCdataIdx=0;
+            break;
+          case 0x80:
+            ADCdata[wADCdataIdx++]=adc_reg>>8;
+            ADCdata[wADCdataIdx++]=adc_reg&0xFF;
+            if (wADCdataIdx>=ADC_BUFFER) wADCdataIdx=0;
+            break;
+          default:
+            if (ADCChannelIdx==0){ 
+              sprintf(tchar, "%s%d", eol, adc_reg);
+            }
+            else{
+              sprintf(tchar, " %d", adc_reg);
+            }
+            i=strlen(tchar);
+            for (j =0; j<i; j++){
+              ADCdata[wADCdataIdx++]=tchar[j];
+              if (wADCdataIdx>=ADC_BUFFER) wADCdataIdx=0;
+            }
+            break;
           }
-          break;
         }
       }
 
@@ -294,16 +324,31 @@ void ADC_Handler()
 void execCommand(int cmd)
 {
   int i;
+  char imdstr[64];
+
   uint8_t *pc =(uint8_t *)&dqCal;
   switch (cmd)
   {
+    case DQCMD_READ:
+      if (dqScanning){
+        imdstr[0]=0;
+        for (i=0;i<ActualChannelCount;i++){
+          sprintf(&imdstr[strlen(imdstr)], "%d, ", ImdADCdata[i]);
+        }
+        sprintf(&imdstr[strlen(imdstr)-2], "\r");
+        SerialUSB.print(imdstr);
+      }
+      break;
+    case DQCMD_STREAM:
+      dqStream=dqPar1.toInt();
+      break;
     case DQCMD_DI145A: //Required by Windaq
       switch (dqPar1.toInt()){
         case 1:
-          SerialUSB.print("1888");
+          SerialUSB.print("1880");
           break;
         case 2:
-          SerialUSB.print("0");
+          SerialUSB.print("73");
           break;
         case 3:
           SerialUSB.print("00000000");
@@ -321,6 +366,7 @@ void execCommand(int cmd)
       break;
     case DQCMD_DI145N: //Required by Windaq
       SerialUSB.print(dqCal.serial_n);
+      SerialUSB.print("88"); //required by Windaq for legacy reason,
       break;
     case DQCMD_START: //Required by Windaq
       start_stop(1);
@@ -372,6 +418,16 @@ void execCommand(int cmd)
       }    
       mode=dqPar1.toInt()&0xff;
       break;
+    case DQCMD_DOUT:
+      if (dqPar1.length ()==0){
+        break;
+      }
+      i=dqPar1.toInt();   
+      if (i==0) 
+          digitalWrite(9, LOW);
+      else
+          digitalWrite(9, HIGH);
+      break;  
     case DQCMD_INFO:
       if (dqPar1.length ()==0){
         break;
@@ -379,20 +435,29 @@ void execCommand(int cmd)
       i=dqPar1.toInt();
       switch(i){
         case 0: //Required by Windaq
-          SerialUSB.println("DATAQ");
+          SerialUSB.print("DATAQ");
+          SerialUSB.print(dqeol);
           break;
         case 1: //Required by Windaq 
-          SerialUSB.println("1888");
+          SerialUSB.print("1888");
+          SerialUSB.print(dqeol);
           break;
         case 2: //Required by Windaq
-          SerialUSB.println(SOFTWARE_REV);
+          SerialUSB.print(SOFTWARE_REV);
+          SerialUSB.print(dqeol);
         case 3: //Required by Windaq
-          SerialUSB.println(HARDWARE_REV);
+          SerialUSB.print(HARDWARE_REV);
+          SerialUSB.print(dqeol);
         case 6: //Required by Windaq
-          SerialUSB.println(dqCal.serial_n); 
+          SerialUSB.print(dqCal.serial_n); 
+          //get_samd21_serno(samd21_serno);
+          //sprintf(imdstr, "SAMD21 Serial Number: 0x%08lx%05lx\n", samd21_serno[0], samd21_serno[3]&0xfffff);    /*It seems the two center long words hardly changes, so we won't use them*/
+          //Serial.print(imdstr);      
+          SerialUSB.print(dqeol);
           break;
         default:
-          SerialUSB.println("Invalid parameter");
+          SerialUSB.print("Invalid parameter");
+          SerialUSB.print(dqeol);
           break;
       }
       break;
@@ -412,14 +477,17 @@ void execCommand(int cmd)
             EEPROM.write(i, pc[i]);
           }
           EEPROM.commit();
-          SerialUSB.println("Done");
+          SerialUSB.print("Done");
+          SerialUSB.print(dqeol);
         }
       }
       break;
     case DQCMD_RFLASH:
       if (dqPar1.length ()>0){
-        for (int i=0; i<sizeof(dqCal); i++) {
-          pc[i]=EEPROM.read(i);
+        if (dqPar1=="init"){
+          for (int i=0; i<sizeof(dqCal); i++) {
+            pc[i]=EEPROM.read(i);
+          }
         }
       }
       for (int i=0; i<sizeof(dqCal); i++) {
@@ -428,8 +496,29 @@ void execCommand(int cmd)
       }
       SerialUSB.print("\r");
       break;
+    case DQCMD_EOL:
+			switch(dqPar1[0])
+			{
+			case '0':
+				dqeol[0] = '\r';	//eol = carriage return
+				dqeol[1] = '\0';
+				break;
+			case '1':
+				dqeol[0] = '\n';	//eol = line feed
+				dqeol[1] = '\0';
+				break;
+			case '2':
+				dqeol[0] = '\r';	//eol = carriage return
+				dqeol[1] = '\n';	//eol = line feed
+				dqeol[2] = '\0';
+			  break;
+			default:
+        break;
+			}    
+      break;
     default:
-      SerialUSB.println("Unsupported command");
+      SerialUSB.print("Unsupported command");
+      SerialUSB.print(dqeol);
       break;
   }
 }
@@ -441,9 +530,16 @@ void start_stop(int i){
   }
   else  {
     ADC->INPUTCTRL.bit.MUXPOS = g_APinDescription[channellist[0]].ulADCChannelNumber;   
-    dqScanning=false;
+    if (dqWindaq) SendS0=true;        //required by WinDaq
     dqWindaq=false;
+/*#ifdef ALLOW_IMD 
     ADCPacer_Timer.stop();
+    findTrueSampleRate(4000);
+    ADCPacer_Timer.start();
+#else    */
+    dqScanning=false;
+    ADCPacer_Timer.stop();
+/*#endif    */
   }
   ch=0;
   wADCdataIdx=0;
@@ -460,7 +556,7 @@ void start_stop(int i){
 
 float findTrueSampleRate (float f)
 {
-  /*Use software AVE instead of buildin hardware AVE to minimize skew between channels*/
+  /*Use software AVE instead of buildin hardware AVE to minimize skew between channels, but it is a little noisier*/
   float r=0.0;
   int i;
   if (f<0.2)f=0.2;
