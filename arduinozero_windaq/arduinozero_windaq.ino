@@ -77,7 +77,7 @@ void setup() {
   int i;
   uint8_t *pc =(uint8_t *)&dqCal;
 
-  ADC->INPUTCTRL.bit.MUXPOS = g_APinDescription[channellist[0]].ulADCChannelNumber;                   // Set the analog input to A1, because plusPin =1?
+  ADC->INPUTCTRL.bit.MUXPOS = g_APinDescription[channellist[0]+14].ulADCChannelNumber;                   // Set the analog input to A1, because plusPin =1?
   ADC->INPUTCTRL.bit.MUXNEG = ADC_INPUTCTRL_MUXNEG_GND_Val;
   ADC->REFCTRL.bit.REFSEL=ADC_REFCTRL_REFSEL_INTVCC1_Val;
   //ADC->REFCTRL.bit.REFSEL=ADC_REFCTRL_REFSEL_INT1V_Val;
@@ -219,7 +219,7 @@ void ADC_Handler()
       adcDecCounter[ch]--;
       ch++;
       if (ch==ActualChannelCount)ch=0;
-      ADC->INPUTCTRL.bit.MUXPOS = g_APinDescription[channellist[ch]].ulADCChannelNumber;  
+      ADC->INPUTCTRL.bit.MUXPOS = g_APinDescription[channellist[ch]+14].ulADCChannelNumber;  
     }
     else{
       /*We have the data now*/
@@ -284,7 +284,7 @@ void ADC_Handler()
       ch++;
       if (ch==ActualChannelCount)ch=0;
 
-      ADC->INPUTCTRL.bit.MUXPOS = g_APinDescription[channellist[ch]].ulADCChannelNumber;  //
+      ADC->INPUTCTRL.bit.MUXPOS = g_APinDescription[channellist[ch]+14].ulADCChannelNumber;  //
 
       ADCChannelIdx++;
 
@@ -531,7 +531,7 @@ void start_stop(int i){
     ADCPacer_Timer.start();
   }
   else  {
-    ADC->INPUTCTRL.bit.MUXPOS = g_APinDescription[channellist[0]].ulADCChannelNumber;   
+    ADC->INPUTCTRL.bit.MUXPOS = g_APinDescription[channellist[0]+14].ulADCChannelNumber;   
     if (dqWindaq) SendS0=true;        //required by WinDaq
     dqWindaq=false;
 /*#ifdef ALLOW_IMD 
