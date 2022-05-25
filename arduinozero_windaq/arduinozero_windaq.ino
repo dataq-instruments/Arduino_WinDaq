@@ -386,7 +386,6 @@ void execCommand(int cmd)
       }
       else{
         RequestedSampleRate=dqPar1.toFloat();
-        RequestedSampleRate=100;
         TrueSampleRate=findTrueSampleRate(RequestedSampleRate);
       }
       break;  
