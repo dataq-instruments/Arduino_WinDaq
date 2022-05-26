@@ -1,5 +1,5 @@
 # Arduino_To_WinDaq
-This is an open source project that can make any **Arduino®** (Arduino Zero is used here) or **Arduino®-compatible** module (Seeed Studio's Seeeduino XIAO is used here) to stream analog waveforms to WinDaq. It supports up to 16 analog channels (4 analog channels is demonstrated in the source codes) to accept readings from on-board ADC or sensors connected to grove connectors. **It supports WinDaq addons like XY plot, Excel link, [FFT, gauge, trigger and more](http://www.ultimaserial.com/wdspectrum.html)**
+This is an open source project that can make any **Arduino®** (Arduino Zero is used here) or **Arduino®-compatible** module (Seeed Studio's Seeeduino XIAO is used here) to stream analog waveforms to [WinDaq](https://www.dataq.com/products/windaq/). It supports up to 16 analog channels (4 analog channels is demonstrated in the source codes) to accept readings from on-board ADC or sensors connected to grove connectors. **It supports WinDaq addons like [XY plot](https://www.dataq.com/products/windaq/add_ons/index.htm), [Excel link](https://www.dataq.com/products/windaq/windaqxl/product.html), [FFT, gauge, trigger and more](http://www.ultimaserial.com/wdspectrum.html)**
 
 This is an on-going project, final Windaq support has not been released yet
 
