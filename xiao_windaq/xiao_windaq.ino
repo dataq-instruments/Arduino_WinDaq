@@ -323,7 +323,7 @@ void ADC_Handler()
 
 void execCommand(int cmd)
 {
-  int i;
+  int i, j;
   char imdstr[64];
 
   uint8_t *pc =(uint8_t *)&dqCal;
@@ -445,9 +445,11 @@ void execCommand(int cmd)
         case 2: //Required by Windaq
           SerialUSB.print(SOFTWARE_REV);
           SerialUSB.print(dqeol);
+          break;
         case 3: //Required by Windaq
           SerialUSB.print(HARDWARE_REV);
           SerialUSB.print(dqeol);
+          break;
         case 6: //Required by Windaq
           SerialUSB.print(dqCal.serial_n); 
           //get_samd21_serno(samd21_serno);

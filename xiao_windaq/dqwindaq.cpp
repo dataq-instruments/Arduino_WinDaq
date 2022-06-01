@@ -26,18 +26,20 @@ String dqPar4;
 bool dqWindaq=false;
 char dqCmdStr[64];
 bool dqScanning=false;
+int dqStream=1;
 
 static int state=0;
 static int cmdStrindex=0;
 dqCal_type dqCal;
+char dqeol[4] = "\r";
 
 int dqEEPROMInit(void)
 {
   int i;
   dqCal.structrev=DQSTRUCT_REV;  
   dqCal.hardwarerev=0;
-  sprintf(dqCal.key, "0123456789ABCDEF"); //required by Windaq
-  sprintf(dqCal.serial_n, "8888888888");  //required by Windaq
+  sprintf(dqCal.key, "0123456789ABCDEF"); //required by Windaq: 16 hex digits
+  sprintf(dqCal.serial_n, "88888888");  //required by Windaq: 8 hex digits
   sprintf(dqCal.lastCalDate, "6214F19E"); //2022/2/22: 2:22:22
 
   for (i=0; i<8; i++){
@@ -131,7 +133,11 @@ void dqParseCommand(char cmdt[]){
     || (cc == 'H')){
     dqCmd =cmdtemp.substring(0, 1); 
     dqPar1= cmdtemp.substring(1); 
-    if (cc!='S') dqWindaq=true;
+    if (cc!='S') { 
+      dqeol[0] = '\r';	//eol = carriage return
+			dqeol[1] = '\0';
+      dqWindaq=true;
+    }
     return;
   }
 
@@ -164,7 +170,8 @@ void dqParseCommand(char cmdt[]){
 
 int dqMatchCommand(String dqCmd){
     int command;
-    if (dqCmd == DQSTR_INFO) command = DQCMD_INFO;
+    if (dqCmd == DQSTR_READ) command = DQCMD_READ;
+    else if (dqCmd == DQSTR_INFO) command = DQCMD_INFO;
 		else if (dqCmd ==DQSTR_START      ) command = DQCMD_START;
 		else if (dqCmd ==DQSTR_STOP       ) command = DQCMD_STOP;
 		else if (dqCmd ==DQSTR_SLIST      ) command = DQCMD_SLIST;
@@ -196,10 +203,12 @@ int dqMatchCommand(String dqCmd){
 		else if (dqCmd ==DQSTR_PGA) command = DQCMD_PGA;
 		else if (dqCmd ==DQSTR_DEBUG) command = DQCMD_DEBUG;
 		else if (dqCmd ==DQSTR_NOP) command = DQCMD_NOP;
+    else if (dqCmd ==DQSTR_NOP2) command = DQCMD_NOP;
 		else if (dqCmd ==DQSTR_RANGE) command = DQCMD_RANGE;
 		else if (dqCmd ==DQSTR_EOL) command = DQCMD_EOL;
 		else if (dqCmd ==DQSTR_WFLASH) command = DQCMD_WFLASH;
     else if (dqCmd ==DQSTR_RFLASH) command = DQCMD_RFLASH;
+    else if (dqCmd ==DQSTR_STREAM) command = DQCMD_STREAM;
     else command=DQCMD_INVALID;
     return command;
 }

@@ -60,10 +60,13 @@
 #define DQCMD_DECA               0x68	
 #define DQCMD_ADV_CMD            0x6F
 #define DQCMD_DAC                0x73
+#define DQCMD_READ               0x74
+#define DQCMD_STREAM             0x75
 #define DQCMD_INVALID            -1
 #define DQCMD_AVAILABLE          1000
 
 #define DQSTR_NOP                "nop"
+#define DQSTR_NOP2                ""
 #define DQSTR_INFO               "info"
 #define DQSTR_START              "start"
 #define DQSTR_STOP               "stop"
@@ -104,6 +107,8 @@
 #define DQSTR_MS                 "ms"
 #define DQSTR_WFLASH   	  	     "writeflash"	
 #define DQSTR_RFLASH   	  	     "readflash"	
+#define DQSTR_READ   	  	       "read"	
+#define DQSTR_STREAM 	  	       "stream"	
 
 #define DQSTRUCT_REV              1
 
@@ -123,8 +128,8 @@ struct dqCal_type{
   unsigned short structrev; 
   unsigned short hardwarerev;
   char key [32];
-  char serial_n[32];
-  char lastCalDate[32];
+  char serial_n[16];
+  char lastCalDate[16];
   short adc_scale[8];
   short adc_offset[8];
 };
@@ -145,3 +150,5 @@ extern bool dqWindaq;
 extern char dqCmdStr[];
 extern bool dqScanning;
 extern dqCal_type dqCal;
+extern int dqStream;
+extern char dqeol[];
