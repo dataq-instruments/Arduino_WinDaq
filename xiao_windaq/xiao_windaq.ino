@@ -14,7 +14,7 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include <TimerTC3.h>
+#include "TimerTC3.h"
 #include "dqwindaq.h"
 #include <FlashAsEEPROM.h>
 
@@ -381,7 +381,7 @@ void execCommand(int cmd)
     case DQCMD_RSAMPLERATE:   //Required by Windaq
     case DQCMD_SAMPLERATE: 
       if (dqPar1.length ()==0){
-        SerialUSB.print(dqCmd+" "+ String(TrueSampleRate, 6));
+        SerialUSB.print(String(TrueSampleRate, 6));
       }
       else{
         RequestedSampleRate=dqPar1.toFloat();
