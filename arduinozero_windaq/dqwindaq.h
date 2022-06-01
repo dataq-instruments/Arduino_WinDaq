@@ -66,6 +66,7 @@
 #define DQCMD_AVAILABLE          1000
 
 #define DQSTR_NOP                "nop"
+#define DQSTR_NOP2                ""
 #define DQSTR_INFO               "info"
 #define DQSTR_START              "start"
 #define DQSTR_STOP               "stop"

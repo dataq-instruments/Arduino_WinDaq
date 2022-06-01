@@ -382,7 +382,7 @@ void execCommand(int cmd)
     case DQCMD_RSAMPLERATE:   //Required by Windaq
     case DQCMD_SAMPLERATE: 
       if (dqPar1.length ()==0){
-        SerialUSB.print(dqCmd+" "+ String(TrueSampleRate, 6));
+        SerialUSB.print(String(TrueSampleRate, 6));
       }
       else{
         RequestedSampleRate=dqPar1.toFloat();
@@ -446,9 +446,11 @@ void execCommand(int cmd)
         case 2: //Required by Windaq
           SerialUSB.print(SOFTWARE_REV);
           SerialUSB.print(dqeol);
+          break;
         case 3: //Required by Windaq
           SerialUSB.print(HARDWARE_REV);
           SerialUSB.print(dqeol);
+          break;
         case 6: //Required by Windaq
           SerialUSB.print(dqCal.serial_n); 
           //get_samd21_serno(samd21_serno);
