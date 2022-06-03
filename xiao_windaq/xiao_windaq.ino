@@ -14,7 +14,7 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include "TimerTC3.h"
+#include <TimerTC3.h>
 #include "dqwindaq.h"
 #include <FlashAsEEPROM.h>
 
@@ -45,7 +45,7 @@ int cmd_type;
 int ADCChannelCount=1;
 int ADCChannelIdx=0;
 int channellist[32]={0,1,2,3};
-int ActualChannelCount=4;
+int ActualChannelCount=1;
 int mode=1;
 char tchar[32];
 char eol[4] = "\r";
@@ -126,7 +126,6 @@ void setup() {
     }
   }
 
-  findTrueSampleRate(4000);
   ADCPacer_Timer.initialize(125);    // The base burst throughput rate is 8000s/s and this is the skew between channels
   ADCPacer_Timer.attachInterrupt(adcPacer_isr);
 
@@ -201,7 +200,7 @@ void ADC_Handler()
 
   if (ADC->INTFLAG.bit.RESRDY)                       // Check if the result ready (RESRDY) flag has been set
   { 
-    long fadc_reg =(unsigned long)ADC->RESULT.reg;     
+    long fadc_reg =(long)ADC->RESULT.reg;     
     int adc_reg;
 
     /*digital calibration*/
@@ -381,7 +380,7 @@ void execCommand(int cmd)
     case DQCMD_RSAMPLERATE:   //Required by Windaq
     case DQCMD_SAMPLERATE: 
       if (dqPar1.length ()==0){
-        SerialUSB.print(String(TrueSampleRate, 6));
+        SerialUSB.print(dqCmd+" "+String(TrueSampleRate, 6));
       }
       else{
         RequestedSampleRate=dqPar1.toFloat();

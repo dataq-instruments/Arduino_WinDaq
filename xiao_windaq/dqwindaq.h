@@ -113,11 +113,11 @@
 #define DQSTRUCT_REV              1
 
 /*Norminal digital calibration constants*/
-#define DQDEFAUL_SCALE            37940
-#define DQDEFAUL_OFFSET           0
+#define DQDEFAUL_SCALE            18876
+#define DQDEFAUL_OFFSET           15
 
 /*Calibration constants*/
-#define DQBASE_SCALE              32768
+#define DQBASE_SCALE              16384
 #define DQ_MIDPOINT               32768
 #define DQ_CEILINGP               32767
 #define DQ_CEILINGN               -32768
