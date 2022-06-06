@@ -139,8 +139,8 @@
 /*Calibration constants*/
 #define DQBASE_SCALE              16384
 #define DQ_MIDPOINT               32768
-#define DQ_CEILINGP               32767
-#define DQ_CEILINGN               -32768
+#define DQ_CEILING                32767
+#define DQ_FLOOR                  -32768
 #define DQ_INVERTSIGN             0x8000
 
 

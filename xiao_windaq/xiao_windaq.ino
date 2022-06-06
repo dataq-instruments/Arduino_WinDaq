@@ -156,8 +156,8 @@ void ADC_Handler()
     fadc_reg = fadc_reg*(long)dqCal.adc_scale[channellist[ch]];
     fadc_reg=fadc_reg/DQBASE_SCALE;
 
-    if (fadc_reg>DQ_CEILINGP)fadc_reg=DQ_CEILINGP;
-    else if (fadc_reg<DQ_CEILINGN)fadc_reg=DQ_CEILINGN;
+    if (fadc_reg>DQ_CEILING)fadc_reg=DQ_CEILING;
+    else if (fadc_reg<DQ_FLOOR)fadc_reg=DQ_FLOOR;
 
     adcAve[ch]+=fadc_reg;
     
