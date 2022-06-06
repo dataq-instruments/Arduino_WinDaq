@@ -27,6 +27,8 @@ bool dqWindaq=false;
 char dqCmdStr[64];
 bool dqScanning=false;
 int dqStream=1;
+int dqMode=1;
+char eol[4] = "\r";
 
 static int state=0;
 static int cmdStrindex=0;
@@ -47,6 +49,7 @@ int dqEEPROMInit(void)
     dqCal.adc_offset[i]=DQDEFAUL_OFFSET;
   }
 }
+
 
 /*This is to be used to find out the true scale/offset*/
 int dqDropCal(void)
@@ -209,7 +212,10 @@ int dqMatchCommand(String dqCmd){
 		else if (dqCmd ==DQSTR_WFLASH) command = DQCMD_WFLASH;
     else if (dqCmd ==DQSTR_RFLASH) command = DQCMD_RFLASH;
     else if (dqCmd ==DQSTR_STREAM) command = DQCMD_STREAM;
+    else if (dqCmd ==DQSTR_SCALE) command = DQCMD_SCALE;
+    else if (dqCmd ==DQSTR_OFFSET) command = DQCMD_OFFSET;
     else command=DQCMD_INVALID;
+     
     return command;
 }
 
@@ -224,4 +230,112 @@ String dqGetString(char arr[])
     String s = arr;
 
     return s.substring(0,len);
+}
+
+int dqLegacyCommand(int cmd)
+{
+  int i, j;
+  char imdstr[64];
+
+  uint8_t *pc =(uint8_t *)&dqCal;
+  switch (cmd)
+  {
+    case DQCMD_NOP:
+      break;
+    case DQCMD_DI145A: //Required by Windaq
+      switch (dqPar1.toInt()){
+        case 1:
+          SerialUSB.print("1880");
+          break;
+        case 2:
+          SerialUSB.print("73");
+          break;
+        case 3:
+          SerialUSB.print("00000000");
+          break;
+        case 4:
+          SerialUSB.print(dqCal.key);
+          break;
+        case 7:
+          SerialUSB.print(dqCal.lastCalDate);
+          break;
+        default:
+          SerialUSB.print("Invalid parameter");
+          break;
+      }
+      cmd=DQCMD_HANDLED;
+      break;
+    case DQCMD_DI145N: //Required by Windaq
+      SerialUSB.print(dqCal.serial_n);
+      SerialUSB.print("88"); //required by Windaq for legacy reason,
+      cmd=DQCMD_HANDLED;
+      break;
+    case DQCMD_ENCODE:
+      if (dqPar1.length ()==0){
+        break;
+      }    
+      dqMode=dqPar1.toInt()&0xff;
+      cmd=DQCMD_HANDLED;
+      break;
+    case DQCMD_INFO:
+      if (dqPar1.length ()==0){
+        break;
+      }
+      i=dqPar1.toInt();
+      switch(i){
+        case 0: //Required by Windaq
+          SerialUSB.print("DATAQ");
+          SerialUSB.print(dqeol);
+          break;
+        case 1: //Required by Windaq 
+          SerialUSB.print("1888");
+          SerialUSB.print(dqeol);
+          break;
+        case 2: //Required by Windaq
+          SerialUSB.print(SOFTWARE_REV);
+          SerialUSB.print(dqeol);
+          break;
+        case 3: //Required by Windaq
+          SerialUSB.print(HARDWARE_REV);
+          SerialUSB.print(dqeol);
+          break;
+        case 6: //Required by Windaq
+          SerialUSB.print(dqCal.serial_n); 
+          SerialUSB.print(dqeol);
+          break;
+        default:
+          SerialUSB.print("Invalid parameter");
+          SerialUSB.print(dqeol);
+          break;
+      }
+      cmd=DQCMD_HANDLED;
+      break;
+    case DQCMD_DI145E: //Required by Windaq
+      cmd=DQCMD_HANDLED;
+      break;
+    case DQCMD_EOL:
+			switch(dqPar1[0])
+			{
+			case '0':
+				dqeol[0] = '\r';	//eol = carriage return
+				dqeol[1] = '\0';
+				break;
+			case '1':
+				dqeol[0] = '\n';	//eol = line feed
+				dqeol[1] = '\0';
+				break;
+			case '2':
+				dqeol[0] = '\r';	//eol = carriage return
+				dqeol[1] = '\n';	//eol = line feed
+				dqeol[2] = '\0';
+			  break;
+			default:
+        break;
+			}    
+      cmd=DQCMD_HANDLED;
+      break;
+    default:
+      break;
+  }
+  return cmd;
 }

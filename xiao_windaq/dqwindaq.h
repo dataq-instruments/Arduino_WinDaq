@@ -17,7 +17,23 @@
 
 #include <Arduino.h>
 
+#define ADC_BUFFER 5000   
+#define ADCPacer_Timer TimerTc3 
+#define MAXADCHANNEL 4
+#define SOFTWARE_REV 0
+#define HARDWARE_REV 0
+
+#define ALLOW_IMD    1
+//#define RELEASE
+
+
+// See SAMD21 datasheet, section "10.3.3 Serial Number"
+#define SERNO0 ((uint32_t *)0x0080a00c)
+#define SERNO1t3 ((uint32_t *)0x0080a040)
+
+
 #define DQCMD_NOP                0x00
+#define DQCMD_HANDLED            0x00   
 #define DQCMD_INFO               0x01
 #define DQCMD_START              0x02
 #define DQCMD_STOP               0x03
@@ -62,11 +78,13 @@
 #define DQCMD_DAC                0x73
 #define DQCMD_READ               0x74
 #define DQCMD_STREAM             0x75
+#define DQCMD_OFFSET             0x76
+#define DQCMD_SCALE              0x77
 #define DQCMD_INVALID            -1
 #define DQCMD_AVAILABLE          1000
 
 #define DQSTR_NOP                "nop"
-#define DQSTR_NOP2                ""
+#define DQSTR_NOP2               "\r"
 #define DQSTR_INFO               "info"
 #define DQSTR_START              "start"
 #define DQSTR_STOP               "stop"
@@ -109,6 +127,8 @@
 #define DQSTR_RFLASH   	  	     "readflash"	
 #define DQSTR_READ   	  	       "read"	
 #define DQSTR_STREAM 	  	       "stream"	
+#define DQSTR_OFFSET 	  	       "offset"	
+#define DQSTR_SCALE 	  	       "scale"	
 
 #define DQSTRUCT_REV              1
 
@@ -140,6 +160,8 @@ extern void dqParseCommand(char cmdt[]);
 extern int dqReceiveChar(int c);
 extern int dqEEPROMInit(void);
 extern int dqDropCal(void);
+extern int dqDefaultCal(void);
+extern int dqLegacyCommand(int cmd);
 
 extern String dqCmd;
 extern String dqPar1;
@@ -152,3 +174,5 @@ extern bool dqScanning;
 extern dqCal_type dqCal;
 extern int dqStream;
 extern char dqeol[];
+extern int dqMode;
+extern char eol[];
