@@ -28,7 +28,6 @@ char dqCmdStr[64];
 bool dqScanning=false;
 int dqStream=1;
 int dqMode=1;
-char eol[4] = "\r";
 
 static int state=0;
 static int cmdStrindex=0;

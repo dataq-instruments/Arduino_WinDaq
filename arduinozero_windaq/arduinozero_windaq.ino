@@ -212,7 +212,7 @@ void ADC_Handler()
             break;
           default:
             if (ADCChannelIdx==0){ 
-              sprintf(tchar, "%s%d", eol, adc_reg);
+              sprintf(tchar, "%s%d", dqeol, adc_reg);
             }
             else{
               sprintf(tchar, " %d", adc_reg);

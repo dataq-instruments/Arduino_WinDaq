@@ -175,4 +175,3 @@ extern dqCal_type dqCal;
 extern int dqStream;
 extern char dqeol[];
 extern int dqMode;
-extern char eol[];
