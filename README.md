@@ -8,7 +8,7 @@ To use the project:
 4) From ArduinoIDE->Tools->Boards->Board Manager, type in XIAO so that the IDE can download all libraries for XIAO
 5) Select ArduinoIDE->Tools->Boards->Seeed SAMD boards->Seeeduino XIAO
 6) Install Flash library by download the project ZIP file from https://github.com/cmaglie/FlashStorage, ArduinoIDE->Sketch->Include Library->Add ZIP Library...
-7) Install Flash library by download the project ZIP file from https://github.com/Seeed-Studio/Seeed_Arduino_LIS3DHTR, ArduinoIDE->Sketch->Include Library->Add ZIP Library...
+7) Optional: Install 3-Axis Digital Accelerometer library by download the project ZIP file from https://github.com/Seeed-Studio/Seeed_Arduino_LIS3DHTR, ArduinoIDE->Sketch->Include Library->Add ZIP Library... (In the sketch, please uncomment INCLUDE_3DACC to use it)
 
 This is an on-going project, final Windaq support has not been released yet
 
