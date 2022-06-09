@@ -8,6 +8,7 @@ To use the project:
 4) From ArduinoIDE->Tools->Boards->Board Manager, type in XIAO so that the IDE can download all libraries for XIAO
 5) Select ArduinoIDE->Tools->Boards->Seeed SAMD boards->Seeeduino XIAO
 6) Install Flash library by download the project ZIP file from https://github.com/cmaglie/FlashStorage, ArduinoIDE->Sketch->Include Library->Add ZIP Library...
+7) Install Flash library by download the project ZIP file from https://github.com/arduino-libraries/Arduino_SensorKit, ArduinoIDE->Sketch->Include Library->Add ZIP Library...
 
 This is an on-going project, final Windaq support has not been released yet
 
