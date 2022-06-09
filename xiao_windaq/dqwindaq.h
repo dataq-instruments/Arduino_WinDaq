@@ -143,6 +143,11 @@
 #define DQ_FLOOR                  -32768
 #define DQ_INVERTSIGN             0x8000
 
+/*Valid model numbers MUST be between [181..189] and [103..119] */
+#define MODELNUMBER               188
+
+/*Valid firmware rev MUST be between 10 to 99 */
+#define FIRMWARE_REV              10
 
 struct dqCal_type{
   unsigned short structrev; 

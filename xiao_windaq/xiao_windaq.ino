@@ -13,6 +13,16 @@
 #include "dqwindaq.h"
 #include <FlashAsEEPROM.h>
 
+//#define INCLUDE_3DACC
+
+#ifdef INCLUDE_3DACC
+/*Add accelerometer to data stream, see https://github.com/Seeed-Studio/Seeed_Arduino_LIS3DHTR*/
+#include "LIS3DHTR.h"
+#include <Wire.h>
+LIS3DHTR<TwoWire> LIS; //IIC
+#define WIRE Wire
+#endif
+
 int cmd_type;
 int ADCChannelCount=1;
 int ADCChannelIdx=0;
@@ -37,6 +47,7 @@ int wADCdataIdx=0;
 int rADCdataIdx=0;
 bool SendS0=false;
 int ch=0x1000;
+int HaveLIS=1;
 
 void adcPacer_isr();
 float findTrueSampleRate (float f);
@@ -50,11 +61,21 @@ void setup() {
 
   SerialUSB.begin(115200);
 
+  NVIC_SetPriority(DMAC_IRQn, 2);
+  NVIC_SetPriority(USB_IRQn, 2);
+
   while (!SerialUSB) {;} // wait for SerialUSB port to connect. 
+
+#ifdef INCLUDE_3DACC
+  LIS.begin(WIRE, LIS3DHTR_ADDRESS_UPDATED); //IIC init
+  delay(100);
+  LIS.setOutputDataRate(LIS3DHTR_DATARATE_50HZ);
+#endif
 }
 
 void loop() {
   int i;
+
   uint8_t *pc =(uint8_t *)&dqCal;
 
   while (SerialUSB.available()){
@@ -90,6 +111,14 @@ void loop() {
         }
       }
     }
+#ifdef INCLUDE_3DACC    
+    if (HaveLIS)
+    {
+      ImdADCdata[4]=LIS.getAccelerationX()*(32767./16.);
+      ImdADCdata[5]=LIS.getAccelerationY()*(32767./16.);
+      ImdADCdata[6]=LIS.getAccelerationZ()*(32767./16.);
+    }
+#endif    
   }
   else {
     if (SendS0){
@@ -100,6 +129,7 @@ void loop() {
 }
 
 void InitADC(void){
+  int i;
   ADC->INPUTCTRL.bit.MUXPOS = g_APinDescription[channellist[0]].ulADCChannelNumber;                   // Set the analog input to A1, because plusPin =1?
   ADC->INPUTCTRL.bit.MUXNEG = ADC_INPUTCTRL_MUXNEG_GND_Val;
   ADC->REFCTRL.bit.REFSEL=ADC_REFCTRL_REFSEL_INTVCC1_Val;
@@ -120,7 +150,7 @@ void InitADC(void){
                      ADC_AVGCTRL_ADJRES(8);
   while(ADC->STATUS.bit.SYNCBUSY);                   // Wait for synchronization  
   
-  NVIC_SetPriority(ADC_IRQn, 1);    // Set the Nested Vector Interrupt Controller (NVIC) priority for the ADC to 0 (highest) 
+  NVIC_SetPriority(ADC_IRQn, 1);    // Set the Nested Vector Interrupt Controller (NVIC) priority for the ADC to 1 (0 is the highest) 
   NVIC_EnableIRQ(ADC_IRQn);         // Connect the ADC to Nested Vector Interrupt Controller (NVIC)
   ADC->INTENSET.reg = ADC_INTENSET_RESRDY;           // Generate interrupt on result ready (RESRDY)
   ADC->CTRLA.bit.ENABLE = 1;                         // Enable the ADC
@@ -130,10 +160,12 @@ void InitADC(void){
   ADCPacer_Timer.attachInterrupt(adcPacer_isr);
 
   findTrueSampleRate(RequestedSampleRate);
- 
+
   NVIC_SetPriority(TC3_IRQn, 0);    // Set the Nested Vector Interrupt Controller (NVIC) priority for the TIMER3 to 0 (highest) 
 
   pinMode(9, OUTPUT); //Use A9 as digital ouptut
+
+  for (i=0; i<16; i++) ImdADCdata[i]=0;
 }
 
 void adcPacer_isr() { 
@@ -241,14 +273,16 @@ void ADC_Handler()
           while (ADCChannelIdx<ADCChannelCount){
             /*Here you can add other channel to the stream*/
             if (dqWindaq){ /*Patch blank data*/
-              ADCdata[wADCdataIdx++]=1;
-              ADCdata[wADCdataIdx++]=1;
+              adc_reg=ImdADCdata[ADCChannelIdx]^DQ_INVERTSIGN;
+              ADCdata[wADCdataIdx++]=(adc_reg>>1)|1;
+              ADCdata[wADCdataIdx++]=(adc_reg>>8)|1;
               if (wADCdataIdx>=ADC_BUFFER) wADCdataIdx=0;
             }
             else{
               if ((dqMode&0x7f)==0){
-                ADCdata[wADCdataIdx++]=0;
-                ADCdata[wADCdataIdx++]=0;
+                adc_reg=ImdADCdata[ADCChannelIdx];
+                ADCdata[wADCdataIdx++]=adc_reg;
+                ADCdata[wADCdataIdx++]=adc_reg>>8;
                 if (wADCdataIdx>=ADC_BUFFER) wADCdataIdx=0;
               }
               else{ /*No need to patch for ASCII format*/  

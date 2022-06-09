@@ -39,8 +39,8 @@ int dqEEPROMInit(void)
   int i;
   dqCal.structrev=DQSTRUCT_REV;  
   dqCal.hardwarerev=0;
-  sprintf(dqCal.key, "0123456789ABCDEF"); //required by Windaq: 16 hex digits
-  sprintf(dqCal.serial_n, "88888888");  //required by Windaq: 8 hex digits
+  sprintf(dqCal.key, "0123456789ABCDEF"); 
+  sprintf(dqCal.serial_n, "88888888");  
   sprintf(dqCal.lastCalDate, "6214F19E"); //2022/2/22: 2:22:22
 
   for (i=0; i<8; i++){
@@ -244,13 +244,13 @@ int dqLegacyCommand(int cmd)
     case DQCMD_DI145A: //Required by Windaq
       switch (dqPar1.toInt()){
         case 1:
-          SerialUSB.print("1880");
+          SerialUSB.print(MODELNUMBER);
           break;
         case 2:
-          SerialUSB.print("73");
+          SerialUSB.print(FIRMWARE_REV);
           break;
         case 3:
-          SerialUSB.print("00000000");
+          SerialUSB.print("00000000"); //Legacy reason
           break;
         case 4:
           SerialUSB.print(dqCal.key);
@@ -287,7 +287,7 @@ int dqLegacyCommand(int cmd)
           SerialUSB.print(dqeol);
           break;
         case 1: //Required by Windaq 
-          SerialUSB.print("1888");
+          SerialUSB.print(MODELNUMBER);
           SerialUSB.print(dqeol);
           break;
         case 2: //Required by Windaq
