@@ -5,7 +5,7 @@ To use the project:
 1) Installing Arduino IDE 2.0rc from https://www.arduino.cc/en/software#experimental-software
 2) If you use XIAO module, following instruction in https://wiki.seeedstudio.com/Seeeduino-XIAO/#:~:text=Install%20it.&text=After%20installing%20the%20board%2C%20click,the%20Tools%20%7C%20Serial%20Port%20menu. Otherwise, jump to step 5)
 3) You may need to restart Arduino IDE to allow XIAO to be added to the search engine
-4) Optional: Install 3-Axis Digital Accelerometer library by download the project ZIP file from https://github.com/Seeed-Studio/Seeed_Arduino_LIS3DHTR, ArduinoIDE->Sketch->Include Library->Add ZIP Library... (In the sketch, please uncomment INCLUDE_3DACC to use it)
+4) Optional (See demo screen shot below): Install 3-Axis Digital Accelerometer library by download the project ZIP file from https://github.com/Seeed-Studio/Seeed_Arduino_LIS3DHTR, ArduinoIDE->Sketch->Include Library->Add ZIP Library... (In the sketch, please uncomment INCLUDE_3DACC to use it)
 5) From ArduinoIDE->Tools->Boards->Board Manager, type in XIAO or Arduino Zero and let IDE download all libraries for your module
 6) Select ArduinoIDE->Tools->Boards->Seeed SAMD boards->Seeeduino XIAO if you use XIAO, or Arduino Zero from the similar path. 
 7) You may also need to specify the COM port for the module
