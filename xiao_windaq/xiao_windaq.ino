@@ -21,6 +21,8 @@
 #include <Wire.h>
 LIS3DHTR<TwoWire> LIS; //IIC
 #define WIRE Wire
+
+int I2Cdata[16];
 #endif
 
 int cmd_type;
@@ -57,7 +59,7 @@ void LoadConfiguration (void);
 void setup() {
   InitADC();
 
-  LoadConfiguration();
+  dqLoadConfiguration();
 
   SerialUSB.begin(115200);
 
@@ -67,6 +69,8 @@ void setup() {
   while (!SerialUSB) {;} // wait for SerialUSB port to connect. 
 
 #ifdef INCLUDE_3DACC
+  /*We may check the level on SDA and SCL to determin if we should use I2C module.
+  When there is nothing connected to it, it reads low, otherwise, it is high*/
   LIS.begin(WIRE, LIS3DHTR_ADDRESS_UPDATED); //IIC init
   delay(100);
   LIS.setOutputDataRate(LIS3DHTR_DATARATE_50HZ);
@@ -114,9 +118,9 @@ void loop() {
 #ifdef INCLUDE_3DACC    
     if (HaveLIS)
     {
-      ImdADCdata[4]=LIS.getAccelerationX()*(32767./16.);
-      ImdADCdata[5]=LIS.getAccelerationY()*(32767./16.);
-      ImdADCdata[6]=LIS.getAccelerationZ()*(32767./16.);
+      I2Cdata[0]=LIS.getAccelerationX()*(32767./16.);
+      I2Cdata[1]=LIS.getAccelerationY()*(32767./16.);
+      I2Cdata[2]=LIS.getAccelerationZ()*(32767./16.);
     }
 #endif    
   }
@@ -207,8 +211,15 @@ void ADC_Handler()
 
       adcAve[ch]=0;
 
+      #ifdef INCLUDE_3DACC
+      if ((channellist[ch]&0xF)>=MAXADCHANNEL){
+         /*We are dealing with artificial channels*/
+         fadc_reg=I2Cdata[(channellist[ch]&0xF)-MAXADCHANNEL];
+      }
+      #endif
+      
       ImdADCdata[ch]=fadc_reg;
-
+      
       if (dqWindaq){
         adc_reg = (int)fadc_reg;
         adc_reg=adc_reg^DQ_INVERTSIGN;
@@ -273,21 +284,30 @@ void ADC_Handler()
           while (ADCChannelIdx<ADCChannelCount){
             /*Here you can add other channel to the stream*/
             if (dqWindaq){ /*Patch blank data*/
-              adc_reg=ImdADCdata[ADCChannelIdx]^DQ_INVERTSIGN;
+            #ifdef INCLUDE_3DACC   
+              adc_reg=I2Cdata[channellist[(ADCChannelIdx&0xF)]-MAXADCHANNEL]^DQ_INVERTSIGN;
+            #else
+              adc_reg=0;
+            #endif                
               ADCdata[wADCdataIdx++]=(adc_reg>>1)|1;
               ADCdata[wADCdataIdx++]=(adc_reg>>8)|1;
               if (wADCdataIdx>=ADC_BUFFER) wADCdataIdx=0;
             }
             else{
+              #ifdef INCLUDE_3DACC   
+                adc_reg=I2Cdata[channellist[(ADCChannelIdx&0xF)]-MAXADCHANNEL];
+              #else
+                adc_reg=0;
+              #endif  
               if ((dqMode&0x7f)==0){
-                adc_reg=ImdADCdata[ADCChannelIdx];
                 ADCdata[wADCdataIdx++]=adc_reg;
                 ADCdata[wADCdataIdx++]=adc_reg>>8;
                 if (wADCdataIdx>=ADC_BUFFER) wADCdataIdx=0;
               }
-              else{ /*No need to patch for ASCII format*/  
+              else{ /*No need to patch for ASCII format*/ 
               }
             }
+            ImdADCdata[ADCChannelIdx]=adc_reg;
 
             ADCChannelIdx++;
           }
@@ -315,7 +335,7 @@ void execCommand(int cmd)
     case DQCMD_READ:
       if (dqScanning){
         imdstr[0]=0;
-        for (i=0;i<ActualChannelCount;i++){
+        for (i=0;i<ADCChannelCount;i++){
           sprintf(&imdstr[strlen(imdstr)], "%d, ", ImdADCdata[i]);
         }
         sprintf(&imdstr[strlen(imdstr)-2], "\r");
@@ -346,6 +366,7 @@ void execCommand(int cmd)
       }
       break;  
     case DQCMD_SLIST: //Required by Windaq
+      /*Actual ADC channels are always in front, and it should not duplicated*/
       if (dqPar1.length ()==0){
         SerialUSB.print(ADCChannelCount);
         break;
@@ -353,8 +374,11 @@ void execCommand(int cmd)
       i=dqPar1.toInt();
       if (i==0){
         ADCChannelCount=1;
-        ActualChannelCount=1;
-        channellist[i]=dqPar2.toInt()&0xf;
+        ActualChannelCount=0;
+        channellist[0]=dqPar2.toInt()&0xf;
+        if ((channellist[0]&0xf)<MAXADCHANNEL){
+          ActualChannelCount=1; //Only the first MAXADCHANNEL channels, in sequential order 
+        }        
         for (i=1;i<32;i++) channellist[i]=0; 
       }
       else {
@@ -468,6 +492,7 @@ float findTrueSampleRate (float f)
   int i;
   if (f<0.2)f=0.2;
 
+  if (ActualChannelCount==0)ActualChannelCount=1;
   long temp=(long)(8000./(f*(float)ActualChannelCount));
 
   if (temp<1)temp=1;
@@ -486,23 +511,3 @@ float findTrueSampleRate (float f)
   return (float)r;
 }
 
-void LoadConfiguration (void)
-{
-  int i;
-  uint8_t *pc =(uint8_t *)&dqCal;
-
-  if (!EEPROM.isValid()) {
-    dqEEPROMInit();
-    for (int i=0; i<sizeof(dqCal); i++) {
-      EEPROM.write(i, pc[i]);
-    }
-    
-    EEPROM.commit();
-    EEPROM.isValid();
-  } 
-  else{
-    for (int i=0; i<sizeof(dqCal); i++) {
-      pc[i]=EEPROM.read(i);
-    }
-  }
-}

@@ -167,6 +167,7 @@ extern int dqEEPROMInit(void);
 extern int dqDropCal(void);
 extern int dqDefaultCal(void);
 extern int dqLegacyCommand(int cmd);
+extern void dqLoadConfiguration (void);
 
 extern String dqCmd;
 extern String dqPar1;

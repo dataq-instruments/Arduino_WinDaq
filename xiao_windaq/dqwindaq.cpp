@@ -338,3 +338,24 @@ int dqLegacyCommand(int cmd)
   }
   return cmd;
 }
+
+void dqLoadConfiguration (void)
+{
+  int i;
+  uint8_t *pc =(uint8_t *)&dqCal;
+
+  if (!EEPROM.isValid()) {
+    dqEEPROMInit();
+    for (int i=0; i<sizeof(dqCal); i++) {
+      EEPROM.write(i, pc[i]);
+    }
+    
+    EEPROM.commit();
+    EEPROM.isValid();
+  } 
+  else{
+    for (int i=0; i<sizeof(dqCal); i++) {
+      pc[i]=EEPROM.read(i);
+    }
+  }
+}
