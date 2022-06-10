@@ -1,7 +1,7 @@
 /*
   Copyright (c) 2022 DATAQ Instruments, 241 Springside Drive, Akron, OH 44333, USA.  All right reserved.
  
-  This project is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License
+  This project is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License 
   as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
   This project is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
@@ -17,6 +17,7 @@
 
 #ifdef INCLUDE_3DACC
 /*Add accelerometer to data stream, see https://github.com/Seeed-Studio/Seeed_Arduino_LIS3DHTR*/
+/*With this option on, you will not be able to run normal analog channel at full speed*/
 #include "LIS3DHTR.h"
 #include <Wire.h>
 LIS3DHTR<TwoWire> LIS; //IIC
@@ -69,11 +70,9 @@ void setup() {
   while (!SerialUSB) {;} // wait for SerialUSB port to connect. 
 
 #ifdef INCLUDE_3DACC
-  /*We may check the level on SDA and SCL to determin if we should use I2C module.
-  When there is nothing connected to it, it reads low, otherwise, it is high*/
   LIS.begin(WIRE, LIS3DHTR_ADDRESS_UPDATED); //IIC init
   delay(100);
-  LIS.setOutputDataRate(LIS3DHTR_DATARATE_50HZ);
+  LIS.setOutputDataRate(LIS3DHTR_DATARATE_100HZ);
 #endif
 }
 

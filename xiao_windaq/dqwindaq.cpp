@@ -245,6 +245,7 @@ int dqLegacyCommand(int cmd)
       switch (dqPar1.toInt()){
         case 1:
           SerialUSB.print(MODELNUMBER);
+          SerialUSB.print("0"); //Legacy reason
           break;
         case 2:
           SerialUSB.print(FIRMWARE_REV);
