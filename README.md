@@ -15,6 +15,6 @@ This is an on-going project, final Windaq support has not been released yet
 
 The major difference between Seeeduino XIAO and Arduino ZERO is their Analog input ports
 
-<img src="http://cdn.shopify.com/s/files/1/0506/1689/3647/products/ABX00003_01.iso_d6dab5cd-56ad-4eb2-8381-bc1ea6de29fb_866x686.jpg" width="300" height="300">  <img src="https://www.chip1stop.com/img/product/SEED/seeeduino-xiao-preview_1.jpg" width="300" height="300">    <img src="https://www.mouser.com/images/seeedstudios/images/114020121_SPL.jpg" >  
+<img src="http://cdn.shopify.com/s/files/1/0506/1689/3647/products/ABX00003_01.iso_d6dab5cd-56ad-4eb2-8381-bc1ea6de29fb_866x686.jpg" width="300" height="300">  <img src="https://www.chip1stop.com/img/product/SEED/seeeduino-xiao-preview_1.jpg" width="300" height="300">  
 
 Warning: the input voltage for **Arduino®** modules is only 0-3.3V! 
