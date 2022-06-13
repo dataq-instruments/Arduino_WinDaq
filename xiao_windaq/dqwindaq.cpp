@@ -213,6 +213,7 @@ int dqMatchCommand(String dqCmd){
     else if (dqCmd ==DQSTR_STREAM) command = DQCMD_STREAM;
     else if (dqCmd ==DQSTR_SCALE) command = DQCMD_SCALE;
     else if (dqCmd ==DQSTR_OFFSET) command = DQCMD_OFFSET;
+    else if (dqCmd ==DQSTR_RCHN) command = DQCMD_RCHN;
     else command=DQCMD_INVALID;
      
     return command;
@@ -334,6 +335,61 @@ int dqLegacyCommand(int cmd)
 			}    
       cmd=DQCMD_HANDLED;
       break;
+    case DQCMD_SCALE:  
+      if ((dqPar1.length ()==0)||(dqPar2.length ()==0)){
+        cmd=DQCMD_HANDLED;
+        break;
+      }
+      i=dqPar1.toInt();
+      if ((i>=0)&&(i<8))
+        dqCal.adc_scale[i]=dqPar2.toInt();
+      cmd=DQCMD_HANDLED;        
+      break;    
+    case DQCMD_OFFSET:
+      if ((dqPar1.length ()==0)||(dqPar2.length ()==0)){
+        cmd=DQCMD_HANDLED;
+        break;
+      }
+      i=dqPar1.toInt();
+      if ((i>=0)&&(i<8))
+        dqCal.adc_offset[i]=dqPar2.toInt();
+      cmd=DQCMD_HANDLED;
+      break;
+    case DQCMD_WFLASH:  
+      if (dqPar1.length ()>0){
+        i=dqPar1.toInt();
+        if ((i>=2)&&(i<sizeof(dqCal))){ /*The first two bytes are structure rev*/
+          if(dqPar2.length ()>0){
+            pc[i]=(uint8_t)dqPar2.toInt()&0xff;
+          }
+        }
+        else if (i==-1){
+          SerialUSB.print("Flash updating...");
+          for (i=0; i<sizeof(dqCal); i++) {
+            EEPROM.write(i, pc[i]);
+          }
+          EEPROM.commit();
+          SerialUSB.print("Done");
+          SerialUSB.print(dqeol);
+        }
+      }
+      cmd=DQCMD_HANDLED;
+      break;
+    case DQCMD_RFLASH:
+      if (dqPar1.length ()>0){
+        if (dqPar1=="init"){
+          for (int i=0; i<sizeof(dqCal); i++) {
+            pc[i]=EEPROM.read(i);
+          }
+        }
+      }
+      for (int i=0; i<sizeof(dqCal); i++) {
+        SerialUSB.print(" ");
+        SerialUSB.print(pc[i]);
+      }
+      SerialUSB.print("\r");
+      cmd=DQCMD_HANDLED;
+      break;      
     default:
       break;
   }
@@ -360,3 +416,4 @@ void dqLoadConfiguration (void)
     }
   }
 }
+

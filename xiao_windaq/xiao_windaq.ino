@@ -16,6 +16,7 @@
 //#define INCLUDE_3DACC
 
 #ifdef INCLUDE_3DACC
+#define TOTAL_CHN 7
 /*Add accelerometer to data stream, see https://github.com/Seeed-Studio/Seeed_Arduino_LIS3DHTR*/
 /*With this option on, you will not be able to run normal analog channel at full speed*/
 #include "LIS3DHTR.h"
@@ -24,6 +25,8 @@ LIS3DHTR<TwoWire> LIS; //IIC
 #define WIRE Wire
 
 int I2Cdata[16];
+#else
+#define TOTAL_CHN 4
 #endif
 
 int cmd_type;
@@ -303,7 +306,7 @@ void ADC_Handler()
                 ADCdata[wADCdataIdx++]=adc_reg>>8;
                 if (wADCdataIdx>=ADC_BUFFER) wADCdataIdx=0;
               }
-              else{ /*No need to patch for ASCII format*/ 
+              else{ /*ASCII mode, if you wish to implement*/
               }
             }
             ImdADCdata[ADCChannelIdx]=adc_reg;
@@ -402,54 +405,8 @@ void execCommand(int cmd)
       else
           digitalWrite(9, HIGH);
       break;  
-    case DQCMD_SCALE:  
-      if ((dqPar1.length ()==0)||(dqPar2.length ()==0)){
-        break;
-      }
-      i=dqPar1.toInt();
-      if ((i>=0)&&(i<8))
-        dqCal.adc_scale[i]=dqPar2.toInt();;
-      break;    
-    case DQCMD_OFFSET:
-      if ((dqPar1.length ()==0)||(dqPar2.length ()==0)){
-        break;
-      }
-      i=dqPar1.toInt();
-      if ((i>=0)&&(i<8))
-        dqCal.adc_offset[i]=dqPar2.toInt();;
-      break;
-    case DQCMD_WFLASH:  
-      if (dqPar1.length ()>0){
-        i=dqPar1.toInt();
-        if ((i>=2)&&(i<sizeof(dqCal))){ /*The first two bytes are structure rev*/
-          if(dqPar2.length ()>0){
-            pc[i]=(uint8_t)dqPar2.toInt()&0xff;
-          }
-        }
-        else if (i==-1){
-          SerialUSB.print("Flash updating...");
-          for (i=0; i<sizeof(dqCal); i++) {
-            EEPROM.write(i, pc[i]);
-          }
-          EEPROM.commit();
-          SerialUSB.print("Done");
-          SerialUSB.print(dqeol);
-        }
-      }
-      break;
-    case DQCMD_RFLASH:
-      if (dqPar1.length ()>0){
-        if (dqPar1=="init"){
-          for (int i=0; i<sizeof(dqCal); i++) {
-            pc[i]=EEPROM.read(i);
-          }
-        }
-      }
-      for (int i=0; i<sizeof(dqCal); i++) {
-        SerialUSB.print(" ");
-        SerialUSB.print(pc[i]);
-      }
-      SerialUSB.print("\r");
+    case DQCMD_RCHN:
+      SerialUSB.print(TOTAL_CHN);
       break;
     default:
       SerialUSB.print("Unsupported command:"+dqCmd);
@@ -486,7 +443,6 @@ void start_stop(int i){
 
 float findTrueSampleRate (float f)
 {
-  /*Use software AVE instead of buildin hardware AVE to minimize skew between channels, but it is a little noisier*/
   float r=0.0;
   int i;
   if (f<0.2)f=0.2;

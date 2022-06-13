@@ -80,6 +80,7 @@
 #define DQCMD_STREAM             0x75
 #define DQCMD_OFFSET             0x76
 #define DQCMD_SCALE              0x77
+#define DQCMD_RCHN               0x78
 #define DQCMD_INVALID            -1
 #define DQCMD_AVAILABLE          1000
 
@@ -129,6 +130,7 @@
 #define DQSTR_STREAM 	  	       "stream"	
 #define DQSTR_OFFSET 	  	       "offset"	
 #define DQSTR_SCALE 	  	       "scale"	
+#define DQSTR_RCHN  	  	       "rchn"	
 
 #define DQSTRUCT_REV              1
 
