@@ -215,7 +215,7 @@ int dqMatchCommand(String dqCmd){
 		else if (dqCmd ==DQSTR_PGA) command = DQCMD_PGA;
 		else if (dqCmd ==DQSTR_DEBUG) command = DQCMD_DEBUG;
 		else if (dqCmd ==DQSTR_NOP) command = DQCMD_NOP;
-    else if (dqCmd ==DQSTR_NOP2) command = DQCMD_NOP;
+		else if (dqCmd ==DQSTR_NOP2) command = DQCMD_NOP;
 		else if (dqCmd ==DQSTR_RANGE) command = DQCMD_RANGE;
 		else if (dqCmd ==DQSTR_EOL) command = DQCMD_EOL;
 		else if (dqCmd ==DQSTR_WFLASH) command = DQCMD_WFLASH;
