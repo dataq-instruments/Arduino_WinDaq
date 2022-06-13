@@ -28,6 +28,16 @@ char dqCmdStr[64];
 bool dqScanning=false;
 int dqStream=1;
 int dqMode=1;
+const String dqChannel[8]={
+  "Volt, -10, 10",
+  "Volt, -10, 10",
+  "Volt, -10, 10",
+  "Volt, -10, 10",
+  "G, -16, 16",
+  "G, -16, 16",
+  "G, -16, 16",
+  "Deg, -275, 1450"
+};
 
 static int state=0;
 static int cmdStrindex=0;

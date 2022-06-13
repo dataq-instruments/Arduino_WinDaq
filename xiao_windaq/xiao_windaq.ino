@@ -13,7 +13,7 @@
 #include "dqwindaq.h"
 #include <FlashAsEEPROM.h>
 
-//#define INCLUDE_3DACC
+#define INCLUDE_3DACC
 
 #ifdef INCLUDE_3DACC
 #define TOTAL_CHN 7
@@ -406,7 +406,12 @@ void execCommand(int cmd)
           digitalWrite(9, HIGH);
       break;  
     case DQCMD_RCHN:
-      SerialUSB.print(TOTAL_CHN);
+      if (dqPar1.length ()==0){
+        SerialUSB.print(TOTAL_CHN);
+      }
+      else if (dqPar2.length ()==0){
+        SerialUSB.print(dqChannel[dqPar1.toInt()&0x7]);  
+      }
       break;
     default:
       SerialUSB.print("Unsupported command:"+dqCmd);
