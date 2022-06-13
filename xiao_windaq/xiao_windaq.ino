@@ -13,9 +13,9 @@
 #include "dqwindaq.h"
 #include <FlashAsEEPROM.h>
 
-#define INCLUDE_3DACC
+//#define INCLUDE_3DACC
 
-//#ifdef INCLUDE_3DACC
+#ifdef INCLUDE_3DACC
 #define TOTAL_CHN 7
 /*Add accelerometer to data stream, see https://github.com/Seeed-Studio/Seeed_Arduino_LIS3DHTR*/
 /*With this option on, you will not be able to run normal analog channel at full speed*/
