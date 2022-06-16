@@ -10,7 +10,7 @@ To use the project:
 6) Select ArduinoIDE->Tools->Boards->Seeed SAMD boards->Seeeduino XIAO if you use XIAO, or Arduino Zero from the similar path. 
 7) You may also need to specify the COM port for the module
 8) Install Flash library by download the project ZIP file from https://github.com/cmaglie/FlashStorage, ArduinoIDE->Sketch->Include Library->Add ZIP Library...
-9) Restart Arduino IDE
+9) Restart Arduino IDE 
 10) Now you can compile and upload the firmware
 
 This is an on-going project, final Windaq support has not been released yet
