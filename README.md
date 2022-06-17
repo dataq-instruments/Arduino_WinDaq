@@ -5,19 +5,23 @@ To use the project:
 1) Installing Arduino IDE 2.0. Please follow instruction from https://www.arduino.cc/en/software#experimental-software 
 2) If you don't use XIAO module, jump to step 3)
     -  following instruction in https://wiki.seeedstudio.com/Seeeduino-XIAO/#:~:text=Install%20it.&text=After%20installing%20the%20board%2C%20click,the%20Tools%20%7C%20Serial%20Port%20menu. 
-    -  Restart Arduino IDE to allow XIAO to be added to the search engine
-    -  From ArduinoIDE->Tools->Boards->Board Manager, type in XIAO or Arduino Zero and let IDE download all libraries for your module
+    - Restart Arduino IDE to allow XIAO to be added to the search engine
+    - From ArduinoIDE->Tools->Boards->Board Manager, type in XIAO or Arduino Zero and let IDE download all libraries for your module
        - When you upgrade Arduino IDE, you may need to upgrade the libraries as well
     - Select ArduinoIDE->Tools->Boards->Seeed SAMD boards->Seeeduino XIAO  
     - You may also need to specify the COM port for the module
-3) Install Flash library by download the project ZIP file from https://github.com/cmaglie/FlashStorage, ArduinoIDE->Sketch->Include Library->Add ZIP Library...
-4) Optional (See demo screen shot below) to add 3-Axis Digital Accelerometers: 
-    - Install 3-Axis Digital Accelerometer library by download the project ZIP file from https://github.com/Seeed-Studio/Seeed_Arduino_LIS3DHTR
-    - From ArduinoIDE->Sketch->Include Library->Add ZIP Library... to add the downloaded library from above step
-    - In the sketch, please uncomment INCLUDE_3DACC to use it. 
+3) Install Flash library
+    - Visit https://github.com/cmaglie/FlashStorage
+    - Push Code button and select Download ZIP
+    - From Arduino IDE, follow ArduinoIDE->Sketch->Include Library->Add ZIP Library... to add the downloaded library from above step
+4) Optional (See demo screen shot below) to add 3-Axis Digital Accelerometers library: 
+    - Visit https://github.com/Seeed-Studio/Seeed_Arduino_LIS3DHTR
+    - Push Code button and select Download ZIP
+    - From Arduino IED, follow ArduinoIDE->Sketch->Include Library->Add ZIP Library... to add the downloaded library from above step
+    - In the sketch, uncomment INCLUDE_3DACC to use it. 
     - **Warning: the input voltage for Arduino® modules is only 0-3.3V!** )
-6) Restart Arduino IDE 
-7) Now you can compile and upload the firmware
+5) Restart Arduino IDE 
+6) Now you can compile and upload the firmware
 
 This is an on-going project, final Windaq support has not been released yet
 
