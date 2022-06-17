@@ -10,10 +10,14 @@ To use the project:
        - When you upgrade Arduino IDE, you may need to upgrade the libraries as well
     - Select ArduinoIDE->Tools->Boards->Seeed SAMD boards->Seeeduino XIAO  
     - You may also need to specify the COM port for the module
-3) Optional (See demo screen shot below): Install 3-Axis Digital Accelerometer library by download the project ZIP file from https://github.com/Seeed-Studio/Seeed_Arduino_LIS3DHTR, ArduinoIDE->Sketch->Include Library->Add ZIP Library... (In the sketch, please uncomment INCLUDE_3DACC to use it. **Warning: the input voltage for Arduino® modules is only 0-3.3V!** )
-4) Install Flash library by download the project ZIP file from https://github.com/cmaglie/FlashStorage, ArduinoIDE->Sketch->Include Library->Add ZIP Library...
-5) Restart Arduino IDE 
-6) Now you can compile and upload the firmware
+3) Install Flash library by download the project ZIP file from https://github.com/cmaglie/FlashStorage, ArduinoIDE->Sketch->Include Library->Add ZIP Library...
+4) Optional (See demo screen shot below) to add 3-Axis Digital Accelerometers: 
+    - Install 3-Axis Digital Accelerometer library by download the project ZIP file from https://github.com/Seeed-Studio/Seeed_Arduino_LIS3DHTR
+    - From ArduinoIDE->Sketch->Include Library->Add ZIP Library... to add the downloaded library from above step
+    - In the sketch, please uncomment INCLUDE_3DACC to use it. 
+    - **Warning: the input voltage for Arduino® modules is only 0-3.3V!** )
+6) Restart Arduino IDE 
+7) Now you can compile and upload the firmware
 
 This is an on-going project, final Windaq support has not been released yet
 
