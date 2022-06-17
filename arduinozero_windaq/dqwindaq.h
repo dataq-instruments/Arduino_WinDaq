@@ -80,6 +80,7 @@
 #define DQCMD_STREAM             0x75
 #define DQCMD_OFFSET             0x76
 #define DQCMD_SCALE              0x77
+#define DQCMD_RCHN               0x78
 #define DQCMD_INVALID            -1
 #define DQCMD_AVAILABLE          1000
 
@@ -129,6 +130,7 @@
 #define DQSTR_STREAM 	  	       "stream"	
 #define DQSTR_OFFSET 	  	       "offset"	
 #define DQSTR_SCALE 	  	       "scale"	
+#define DQSTR_RCHN  	  	       "rchn"	
 
 #define DQSTRUCT_REV              1
 
@@ -143,6 +145,11 @@
 #define DQ_FLOOR                  -32768
 #define DQ_INVERTSIGN             0x8000
 
+/*Valid model numbers MUST be between [181..189] and [103..119] */
+#define MODELNUMBER               188
+
+/*Valid firmware rev MUST be between 10 to 99 */
+#define FIRMWARE_REV              10
 
 struct dqCal_type{
   unsigned short structrev; 
@@ -162,6 +169,7 @@ extern int dqEEPROMInit(void);
 extern int dqDropCal(void);
 extern int dqDefaultCal(void);
 extern int dqLegacyCommand(int cmd);
+extern void dqLoadConfiguration (void);
 
 extern String dqCmd;
 extern String dqPar1;
@@ -175,3 +183,4 @@ extern dqCal_type dqCal;
 extern int dqStream;
 extern char dqeol[];
 extern int dqMode;
+extern const String dqChannel[8];

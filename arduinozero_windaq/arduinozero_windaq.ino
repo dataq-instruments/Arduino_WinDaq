@@ -1,7 +1,7 @@
 /*
   Copyright (c) 2022 DATAQ Instruments, 241 Springside Drive, Akron, OH 44333, USA.  All right reserved.
  
-  This project is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License
+  This project is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License 
   as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
   This project is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
@@ -12,6 +12,22 @@
 #include "TimerTC3.h"
 #include "dqwindaq.h"
 #include <FlashAsEEPROM.h>
+
+//#define INCLUDE_3DACC
+
+#ifdef INCLUDE_3DACC
+#define TOTAL_CHN 7
+/*Add accelerometer to data stream, see https://github.com/Seeed-Studio/Seeed_Arduino_LIS3DHTR*/
+/*With this option on, you will not be able to run normal analog channel at full speed*/
+#include "LIS3DHTR.h"
+#include <Wire.h>
+LIS3DHTR<TwoWire> LIS; //IIC
+#define WIRE Wire
+
+int I2Cdata[16];
+#else
+#define TOTAL_CHN 4
+#endif
 
 int cmd_type;
 int ADCChannelCount=1;
@@ -37,6 +53,7 @@ int wADCdataIdx=0;
 int rADCdataIdx=0;
 bool SendS0=false;
 int ch=0x1000;
+int HaveLIS=1;
 
 void adcPacer_isr();
 float findTrueSampleRate (float f);
@@ -46,15 +63,25 @@ void LoadConfiguration (void);
 void setup() {
   InitADC();
 
-  LoadConfiguration();
+  dqLoadConfiguration();
 
   SerialUSB.begin(115200);
 
+  NVIC_SetPriority(DMAC_IRQn, 2);
+  NVIC_SetPriority(USB_IRQn, 2);
+
   while (!SerialUSB) {;} // wait for SerialUSB port to connect. 
+
+#ifdef INCLUDE_3DACC
+  LIS.begin(WIRE, LIS3DHTR_ADDRESS_UPDATED); //IIC init
+  delay(100);
+  LIS.setOutputDataRate(LIS3DHTR_DATARATE_100HZ);
+#endif
 }
 
 void loop() {
   int i;
+
   uint8_t *pc =(uint8_t *)&dqCal;
 
   while (SerialUSB.available()){
@@ -90,6 +117,14 @@ void loop() {
         }
       }
     }
+#ifdef INCLUDE_3DACC    
+    if (HaveLIS)
+    {
+      I2Cdata[0]=LIS.getAccelerationX()*(32767./16.);
+      I2Cdata[1]=LIS.getAccelerationY()*(32767./16.);
+      I2Cdata[2]=LIS.getAccelerationZ()*(32767./16.);
+    }
+#endif    
   }
   else {
     if (SendS0){
@@ -100,6 +135,7 @@ void loop() {
 }
 
 void InitADC(void){
+  int i;
   ADC->INPUTCTRL.bit.MUXPOS = g_APinDescription[channellist[0]+14].ulADCChannelNumber;                   // Set the analog input to A1, because plusPin =1?
   ADC->INPUTCTRL.bit.MUXNEG = ADC_INPUTCTRL_MUXNEG_GND_Val;
   ADC->REFCTRL.bit.REFSEL=ADC_REFCTRL_REFSEL_INTVCC1_Val;
@@ -120,7 +156,7 @@ void InitADC(void){
                      ADC_AVGCTRL_ADJRES(8);
   while(ADC->STATUS.bit.SYNCBUSY);                   // Wait for synchronization  
   
-  NVIC_SetPriority(ADC_IRQn, 1);    // Set the Nested Vector Interrupt Controller (NVIC) priority for the ADC to 0 (highest) 
+  NVIC_SetPriority(ADC_IRQn, 1);    // Set the Nested Vector Interrupt Controller (NVIC) priority for the ADC to 1 (0 is the highest) 
   NVIC_EnableIRQ(ADC_IRQn);         // Connect the ADC to Nested Vector Interrupt Controller (NVIC)
   ADC->INTENSET.reg = ADC_INTENSET_RESRDY;           // Generate interrupt on result ready (RESRDY)
   ADC->CTRLA.bit.ENABLE = 1;                         // Enable the ADC
@@ -130,10 +166,12 @@ void InitADC(void){
   ADCPacer_Timer.attachInterrupt(adcPacer_isr);
 
   findTrueSampleRate(RequestedSampleRate);
- 
+
   NVIC_SetPriority(TC3_IRQn, 0);    // Set the Nested Vector Interrupt Controller (NVIC) priority for the TIMER3 to 0 (highest) 
 
   pinMode(9, OUTPUT); //Use A9 as digital ouptut
+
+  for (i=0; i<16; i++) ImdADCdata[i]=0;
 }
 
 void adcPacer_isr() { 
@@ -175,8 +213,15 @@ void ADC_Handler()
 
       adcAve[ch]=0;
 
+      #ifdef INCLUDE_3DACC
+      if ((channellist[ch]&0xF)>=MAXADCHANNEL){
+         /*We are dealing with artificial channels*/
+         fadc_reg=I2Cdata[(channellist[ch]&0xF)-MAXADCHANNEL];
+      }
+      #endif
+      
       ImdADCdata[ch]=fadc_reg;
-
+      
       if (dqWindaq){
         adc_reg = (int)fadc_reg;
         adc_reg=adc_reg^DQ_INVERTSIGN;
@@ -241,19 +286,30 @@ void ADC_Handler()
           while (ADCChannelIdx<ADCChannelCount){
             /*Here you can add other channel to the stream*/
             if (dqWindaq){ /*Patch blank data*/
-              ADCdata[wADCdataIdx++]=1;
-              ADCdata[wADCdataIdx++]=1;
+            #ifdef INCLUDE_3DACC   
+              adc_reg=I2Cdata[channellist[(ADCChannelIdx&0xF)]-MAXADCHANNEL]^DQ_INVERTSIGN;
+            #else
+              adc_reg=0;
+            #endif                
+              ADCdata[wADCdataIdx++]=(adc_reg>>1)|1;
+              ADCdata[wADCdataIdx++]=(adc_reg>>8)|1;
               if (wADCdataIdx>=ADC_BUFFER) wADCdataIdx=0;
             }
             else{
+              #ifdef INCLUDE_3DACC   
+                adc_reg=I2Cdata[channellist[(ADCChannelIdx&0xF)]-MAXADCHANNEL];
+              #else
+                adc_reg=0;
+              #endif  
               if ((dqMode&0x7f)==0){
-                ADCdata[wADCdataIdx++]=0;
-                ADCdata[wADCdataIdx++]=0;
+                ADCdata[wADCdataIdx++]=adc_reg;
+                ADCdata[wADCdataIdx++]=adc_reg>>8;
                 if (wADCdataIdx>=ADC_BUFFER) wADCdataIdx=0;
               }
-              else{ /*No need to patch for ASCII format*/  
+              else{ /*ASCII mode, if you wish to implement*/
               }
             }
+            ImdADCdata[ADCChannelIdx]=adc_reg;
 
             ADCChannelIdx++;
           }
@@ -281,7 +337,7 @@ void execCommand(int cmd)
     case DQCMD_READ:
       if (dqScanning){
         imdstr[0]=0;
-        for (i=0;i<ActualChannelCount;i++){
+        for (i=0;i<ADCChannelCount;i++){
           sprintf(&imdstr[strlen(imdstr)], "%d, ", ImdADCdata[i]);
         }
         sprintf(&imdstr[strlen(imdstr)-2], "\r");
@@ -312,6 +368,7 @@ void execCommand(int cmd)
       }
       break;  
     case DQCMD_SLIST: //Required by Windaq
+      /*Actual ADC channels are always in front, and it should not duplicated*/
       if (dqPar1.length ()==0){
         SerialUSB.print(ADCChannelCount);
         break;
@@ -319,8 +376,11 @@ void execCommand(int cmd)
       i=dqPar1.toInt();
       if (i==0){
         ADCChannelCount=1;
-        ActualChannelCount=1;
-        channellist[i]=dqPar2.toInt()&0xf;
+        ActualChannelCount=0;
+        channellist[0]=dqPar2.toInt()&0xf;
+        if ((channellist[0]&0xf)<MAXADCHANNEL){
+          ActualChannelCount=1; //Only the first MAXADCHANNEL channels, in sequential order 
+        }        
         for (i=1;i<32;i++) channellist[i]=0; 
       }
       else {
@@ -345,54 +405,13 @@ void execCommand(int cmd)
       else
           digitalWrite(9, HIGH);
       break;  
-    case DQCMD_SCALE:  
-      if ((dqPar1.length ()==0)||(dqPar2.length ()==0)){
-        break;
+    case DQCMD_RCHN:
+      if (dqPar1.length ()==0){
+        SerialUSB.print(TOTAL_CHN);
       }
-      i=dqPar1.toInt();
-      if ((i>=0)&&(i<8))
-        dqCal.adc_scale[i]=dqPar2.toInt();;
-      break;    
-    case DQCMD_OFFSET:
-      if ((dqPar1.length ()==0)||(dqPar2.length ()==0)){
-        break;
+      else if (dqPar2.length ()==0){
+        SerialUSB.print(dqChannel[dqPar1.toInt()&0x7]);  
       }
-      i=dqPar1.toInt();
-      if ((i>=0)&&(i<8))
-        dqCal.adc_offset[i]=dqPar2.toInt();;
-      break;
-    case DQCMD_WFLASH:  
-      if (dqPar1.length ()>0){
-        i=dqPar1.toInt();
-        if ((i>=2)&&(i<sizeof(dqCal))){ /*The first two bytes are structure rev*/
-          if(dqPar2.length ()>0){
-            pc[i]=(uint8_t)dqPar2.toInt()&0xff;
-          }
-        }
-        else if (i==-1){
-          SerialUSB.print("Flash updating...");
-          for (i=0; i<sizeof(dqCal); i++) {
-            EEPROM.write(i, pc[i]);
-          }
-          EEPROM.commit();
-          SerialUSB.print("Done");
-          SerialUSB.print(dqeol);
-        }
-      }
-      break;
-    case DQCMD_RFLASH:
-      if (dqPar1.length ()>0){
-        if (dqPar1=="init"){
-          for (int i=0; i<sizeof(dqCal); i++) {
-            pc[i]=EEPROM.read(i);
-          }
-        }
-      }
-      for (int i=0; i<sizeof(dqCal); i++) {
-        SerialUSB.print(" ");
-        SerialUSB.print(pc[i]);
-      }
-      SerialUSB.print("\r");
       break;
     default:
       SerialUSB.print("Unsupported command:"+dqCmd);
@@ -429,11 +448,11 @@ void start_stop(int i){
 
 float findTrueSampleRate (float f)
 {
-  /*Use software AVE instead of buildin hardware AVE to minimize skew between channels, but it is a little noisier*/
   float r=0.0;
   int i;
   if (f<0.2)f=0.2;
 
+  if (ActualChannelCount==0)ActualChannelCount=1;
   long temp=(long)(8000./(f*(float)ActualChannelCount));
 
   if (temp<1)temp=1;
@@ -452,23 +471,3 @@ float findTrueSampleRate (float f)
   return (float)r;
 }
 
-void LoadConfiguration (void)
-{
-  int i;
-  uint8_t *pc =(uint8_t *)&dqCal;
-
-  if (!EEPROM.isValid()) {
-    dqEEPROMInit();
-    for (int i=0; i<sizeof(dqCal); i++) {
-      EEPROM.write(i, pc[i]);
-    }
-    
-    EEPROM.commit();
-    EEPROM.isValid();
-  } 
-  else{
-    for (int i=0; i<sizeof(dqCal); i++) {
-      pc[i]=EEPROM.read(i);
-    }
-  }
-}

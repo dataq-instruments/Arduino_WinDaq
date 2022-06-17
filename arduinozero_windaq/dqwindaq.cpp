@@ -28,6 +28,16 @@ char dqCmdStr[64];
 bool dqScanning=false;
 int dqStream=1;
 int dqMode=1;
+const String dqChannel[8]={
+  "Volt, -10, 10",
+  "Volt, -10, 10",
+  "Volt, -10, 10",
+  "Volt, -10, 10",
+  "G, -16, 16",
+  "G, -16, 16",
+  "G, -16, 16",
+  "Deg, -275, 1450"
+};
 
 static int state=0;
 static int cmdStrindex=0;
@@ -39,8 +49,8 @@ int dqEEPROMInit(void)
   int i;
   dqCal.structrev=DQSTRUCT_REV;  
   dqCal.hardwarerev=0;
-  sprintf(dqCal.key, "0123456789ABCDEF"); //required by Windaq: 16 hex digits
-  sprintf(dqCal.serial_n, "88888888");  //required by Windaq: 8 hex digits
+  sprintf(dqCal.key, "0123456789ABCDEF"); 
+  sprintf(dqCal.serial_n, "88888888");  
   sprintf(dqCal.lastCalDate, "6214F19E"); //2022/2/22: 2:22:22
 
   for (i=0; i<8; i++){
@@ -174,45 +184,46 @@ int dqMatchCommand(String dqCmd){
     int command;
     if (dqCmd == DQSTR_READ) command = DQCMD_READ;
     else if (dqCmd == DQSTR_INFO) command = DQCMD_INFO;
-		else if (dqCmd ==DQSTR_START      ) command = DQCMD_START;
-		else if (dqCmd ==DQSTR_STOP       ) command = DQCMD_STOP;
-		else if (dqCmd ==DQSTR_SLIST      ) command = DQCMD_SLIST;
-		else if (dqCmd ==DQSTR_SRATE      ) command = DQCMD_SAMPLERATE;
-		else if (dqCmd ==DQSTR_RRATE      ) command = DQCMD_RSAMPLERATE;
-		else if (dqCmd ==DQSTR_FILTER     ) command = DQCMD_FILTER;
-		else if (dqCmd ==DQSTR_SAMPLERATE) command = DQCMD_SAMPLERATE;
-		else if (dqCmd ==DQSTR_RSAMPLERATE) command = DQCMD_RSAMPLERATE;
-		else if (dqCmd ==DQSTR_FILTER) command = DQCMD_FILTER;
-		else if (dqCmd ==DQSTR_DI145A) command = DQCMD_DI145A;
-		else if (dqCmd ==DQSTR_DI145B) command = DQCMD_DI145B;
-		else if (dqCmd ==DQSTR_DI145C) command = DQCMD_DI145C;
-		else if (dqCmd ==DQSTR_DI145D) command = DQCMD_DI145D;
-		else if (dqCmd ==DQSTR_DI145E) command = DQCMD_DI145E;
-		else if (dqCmd ==DQSTR_DI145L) command = DQCMD_DI145L;
-		else if (dqCmd ==DQSTR_DI145M) command = DQCMD_DI145M;
-		else if (dqCmd ==DQSTR_DI145N) command = DQCMD_DI145N;
-		else if (dqCmd ==DQSTR_DI145S) command = DQCMD_DI145S;
-		else if (dqCmd ==DQSTR_DI145R) command = DQCMD_DI145R;
-		else if (dqCmd ==DQSTR_DI145H) command = DQCMD_DI145H;
-		else if (dqCmd ==DQSTR_CHN) command = DQCMD_SLIST;
-		else if (dqCmd ==DQSTR_DIN) command = DQCMD_DIN;
-		else if (dqCmd ==DQSTR_DOUT) command = DQCMD_DOUT;
-		else if (dqCmd ==DQSTR_RESET) command = DQCMD_RESET;
-		else if (dqCmd ==DQSTR_ENDO) command = DQCMD_ENDO;
-		else if (dqCmd ==DQSTR_FFL) command = DQCMD_FFL;
-		else if (dqCmd ==DQSTR_LED) command = DQCMD_LED;
-		else if (dqCmd ==DQSTR_ENCODE) command = DQCMD_ENCODE;
-		else if (dqCmd ==DQSTR_PGA) command = DQCMD_PGA;
-		else if (dqCmd ==DQSTR_DEBUG) command = DQCMD_DEBUG;
-		else if (dqCmd ==DQSTR_NOP) command = DQCMD_NOP;
+    else if (dqCmd ==DQSTR_START      ) command = DQCMD_START;
+    else if (dqCmd ==DQSTR_STOP       ) command = DQCMD_STOP;
+    else if (dqCmd ==DQSTR_SLIST      ) command = DQCMD_SLIST;
+    else if (dqCmd ==DQSTR_SRATE      ) command = DQCMD_SAMPLERATE;
+    else if (dqCmd ==DQSTR_RRATE      ) command = DQCMD_RSAMPLERATE;
+    else if (dqCmd ==DQSTR_FILTER     ) command = DQCMD_FILTER;
+    else if (dqCmd ==DQSTR_SAMPLERATE) command = DQCMD_SAMPLERATE;
+    else if (dqCmd ==DQSTR_RSAMPLERATE) command = DQCMD_RSAMPLERATE;
+    else if (dqCmd ==DQSTR_FILTER) command = DQCMD_FILTER;
+    else if (dqCmd ==DQSTR_DI145A) command = DQCMD_DI145A;
+    else if (dqCmd ==DQSTR_DI145B) command = DQCMD_DI145B;
+    else if (dqCmd ==DQSTR_DI145C) command = DQCMD_DI145C;
+    else if (dqCmd ==DQSTR_DI145D) command = DQCMD_DI145D;
+    else if (dqCmd ==DQSTR_DI145E) command = DQCMD_DI145E;
+    else if (dqCmd ==DQSTR_DI145L) command = DQCMD_DI145L;
+    else if (dqCmd ==DQSTR_DI145M) command = DQCMD_DI145M;
+    else if (dqCmd ==DQSTR_DI145N) command = DQCMD_DI145N;
+    else if (dqCmd ==DQSTR_DI145S) command = DQCMD_DI145S;
+    else if (dqCmd ==DQSTR_DI145R) command = DQCMD_DI145R;
+    else if (dqCmd ==DQSTR_DI145H) command = DQCMD_DI145H;
+    else if (dqCmd ==DQSTR_CHN) command = DQCMD_SLIST;
+    else if (dqCmd ==DQSTR_DIN) command = DQCMD_DIN;
+    else if (dqCmd ==DQSTR_DOUT) command = DQCMD_DOUT;
+    else if (dqCmd ==DQSTR_RESET) command = DQCMD_RESET;
+    else if (dqCmd ==DQSTR_ENDO) command = DQCMD_ENDO;
+    else if (dqCmd ==DQSTR_FFL) command = DQCMD_FFL;
+    else if (dqCmd ==DQSTR_LED) command = DQCMD_LED;
+    else if (dqCmd ==DQSTR_ENCODE) command = DQCMD_ENCODE;
+    else if (dqCmd ==DQSTR_PGA) command = DQCMD_PGA;
+    else if (dqCmd ==DQSTR_DEBUG) command = DQCMD_DEBUG;
+    else if (dqCmd ==DQSTR_NOP) command = DQCMD_NOP;
     else if (dqCmd ==DQSTR_NOP2) command = DQCMD_NOP;
-		else if (dqCmd ==DQSTR_RANGE) command = DQCMD_RANGE;
-		else if (dqCmd ==DQSTR_EOL) command = DQCMD_EOL;
-		else if (dqCmd ==DQSTR_WFLASH) command = DQCMD_WFLASH;
+    else if (dqCmd ==DQSTR_RANGE) command = DQCMD_RANGE;
+    else if (dqCmd ==DQSTR_EOL) command = DQCMD_EOL;
+    else if (dqCmd ==DQSTR_WFLASH) command = DQCMD_WFLASH;
     else if (dqCmd ==DQSTR_RFLASH) command = DQCMD_RFLASH;
     else if (dqCmd ==DQSTR_STREAM) command = DQCMD_STREAM;
     else if (dqCmd ==DQSTR_SCALE) command = DQCMD_SCALE;
     else if (dqCmd ==DQSTR_OFFSET) command = DQCMD_OFFSET;
+    else if (dqCmd ==DQSTR_RCHN) command = DQCMD_RCHN;
     else command=DQCMD_INVALID;
      
     return command;
@@ -244,13 +255,14 @@ int dqLegacyCommand(int cmd)
     case DQCMD_DI145A: //Required by Windaq
       switch (dqPar1.toInt()){
         case 1:
-          SerialUSB.print("1880");
+          SerialUSB.print(MODELNUMBER);
+          SerialUSB.print("0"); //Legacy reason
           break;
         case 2:
-          SerialUSB.print("73");
+          SerialUSB.print(FIRMWARE_REV);
           break;
         case 3:
-          SerialUSB.print("00000000");
+          SerialUSB.print("00000000"); //Legacy reason
           break;
         case 4:
           SerialUSB.print(dqCal.key);
@@ -287,7 +299,7 @@ int dqLegacyCommand(int cmd)
           SerialUSB.print(dqeol);
           break;
         case 1: //Required by Windaq 
-          SerialUSB.print("1888");
+          SerialUSB.print(MODELNUMBER);
           SerialUSB.print(dqeol);
           break;
         case 2: //Required by Windaq
@@ -298,9 +310,13 @@ int dqLegacyCommand(int cmd)
           SerialUSB.print(HARDWARE_REV);
           SerialUSB.print(dqeol);
           break;
+        case 4: //Key
+          break;  
         case 6: //Required by Windaq
           SerialUSB.print(dqCal.serial_n); 
           SerialUSB.print(dqeol);
+          break;
+        case 10: //hardware ID
           break;
         default:
           SerialUSB.print("Invalid parameter");
@@ -333,8 +349,85 @@ int dqLegacyCommand(int cmd)
 			}    
       cmd=DQCMD_HANDLED;
       break;
+    case DQCMD_SCALE:  
+      if ((dqPar1.length ()==0)||(dqPar2.length ()==0)){
+        cmd=DQCMD_HANDLED;
+        break;
+      }
+      i=dqPar1.toInt();
+      if ((i>=0)&&(i<8))
+        dqCal.adc_scale[i]=dqPar2.toInt();
+      cmd=DQCMD_HANDLED;        
+      break;    
+    case DQCMD_OFFSET:
+      if ((dqPar1.length ()==0)||(dqPar2.length ()==0)){
+        cmd=DQCMD_HANDLED;
+        break;
+      }
+      i=dqPar1.toInt();
+      if ((i>=0)&&(i<8))
+        dqCal.adc_offset[i]=dqPar2.toInt();
+      cmd=DQCMD_HANDLED;
+      break;
+    case DQCMD_WFLASH:  
+      if (dqPar1.length ()>0){
+        i=dqPar1.toInt();
+        if ((i>=2)&&(i<sizeof(dqCal))){ /*The first two bytes are structure rev*/
+          if(dqPar2.length ()>0){
+            pc[i]=(uint8_t)dqPar2.toInt()&0xff;
+          }
+        }
+        else if (i==-1){
+          SerialUSB.print("Flash updating...");
+          for (i=0; i<sizeof(dqCal); i++) {
+            EEPROM.write(i, pc[i]);
+          }
+          EEPROM.commit();
+          SerialUSB.print("Done");
+          SerialUSB.print(dqeol);
+        }
+      }
+      cmd=DQCMD_HANDLED;
+      break;
+    case DQCMD_RFLASH:
+      if (dqPar1.length ()>0){
+        if (dqPar1=="init"){
+          for (int i=0; i<sizeof(dqCal); i++) {
+            pc[i]=EEPROM.read(i);
+          }
+        }
+      }
+      for (int i=0; i<sizeof(dqCal); i++) {
+        SerialUSB.print(" ");
+        SerialUSB.print(pc[i]);
+      }
+      SerialUSB.print("\r");
+      cmd=DQCMD_HANDLED;
+      break;      
     default:
       break;
   }
   return cmd;
 }
+
+void dqLoadConfiguration (void)
+{
+  int i;
+  uint8_t *pc =(uint8_t *)&dqCal;
+
+  if (!EEPROM.isValid()) {
+    dqEEPROMInit();
+    for (int i=0; i<sizeof(dqCal); i++) {
+      EEPROM.write(i, pc[i]);
+    }
+    
+    EEPROM.commit();
+    EEPROM.isValid();
+  } 
+  else{
+    for (int i=0; i<sizeof(dqCal); i++) {
+      pc[i]=EEPROM.read(i);
+    }
+  }
+}
+
