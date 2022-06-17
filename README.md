@@ -19,7 +19,7 @@ To use the project:
     - Push Code button and select Download ZIP
     - From Arduino IED, follow ArduinoIDE->Sketch->Include Library->Add ZIP Library... to add the downloaded library from above step
     - In the sketch, uncomment INCLUDE_3DACC to use it. 
-    - **Warning: the input voltage for Arduino® modules is only 0-3.3V!** )
+    - **Warning: the input voltage for Arduino® modules is only 0-3.3V!**
 5) Restart Arduino IDE 
 6) Now you can compile and upload the firmware
 
