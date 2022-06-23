@@ -22,6 +22,7 @@ To use the project:
     - **Warning: the input voltage for Arduino® modules is only 0-3.3V!**
 5) Restart Arduino IDE 
 6) Now you can compile and upload the firmware
+7) FYI: https://www.istime.com/wp-content/uploads/2016/07/Make-COM-ports-available.pdf
 
 This is an on-going project, final Windaq support has not been released yet
 
