@@ -412,6 +412,7 @@ void execCommand(int cmd)
       else if (dqPar2.length ()==0){
         SerialUSB.print(dqChannel[dqPar1.toInt()&0x7]);  
       }
+      SerialUSB.print(dqeol);
       break;
     default:
       SerialUSB.print("Unsupported command:"+dqCmd);

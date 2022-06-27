@@ -310,9 +310,13 @@ int dqLegacyCommand(int cmd)
           SerialUSB.print(HARDWARE_REV);
           SerialUSB.print(dqeol);
           break;
+        case 4: //Key
+          break;  
         case 6: //Required by Windaq
           SerialUSB.print(dqCal.serial_n); 
           SerialUSB.print(dqeol);
+          break;
+        case 10: //hardware ID
           break;
         default:
           SerialUSB.print("Invalid parameter");
