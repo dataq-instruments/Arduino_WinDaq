@@ -28,6 +28,7 @@ char dqCmdStr[64];
 bool dqScanning=false;
 int dqStream=1;
 int dqMode=1;
+int dqTotalChannel=4;
 const String dqChannel[8]={
   "Volt, -10, 10",
   "Volt, -10, 10",
@@ -37,6 +38,10 @@ const String dqChannel[8]={
   "G, -16, 16",
   "G, -16, 16",
   "Deg, -275, 1450"
+};
+
+const int dqGain[8]={
+  1,1,1,1,1,1,1,1
 };
 
 static int state=0;
@@ -224,6 +229,7 @@ int dqMatchCommand(String dqCmd){
     else if (dqCmd ==DQSTR_SCALE) command = DQCMD_SCALE;
     else if (dqCmd ==DQSTR_OFFSET) command = DQCMD_OFFSET;
     else if (dqCmd ==DQSTR_RCHN) command = DQCMD_RCHN;
+    else if (dqCmd ==DQSTR_RGAIN) command = DQCMD_RGAIN;
     else command=DQCMD_INVALID;
      
     return command;
@@ -286,6 +292,24 @@ int dqLegacyCommand(int cmd)
         break;
       }    
       dqMode=dqPar1.toInt()&0xff;
+      cmd=DQCMD_HANDLED;
+      break;
+    case DQCMD_RCHN:
+      if (dqPar1.length ()==0){
+        SerialUSB.print(dqTotalChannel);
+      }
+      else if (dqPar2.length ()==0){
+        SerialUSB.print(dqChannel[dqPar1.toInt()&0x7]);  
+      }
+      SerialUSB.print(dqeol);
+      cmd=DQCMD_HANDLED;
+      break;    
+    case DQCMD_RGAIN:
+      for (i=0; i<dqTotalChannel; i++){
+        SerialUSB.print(dqGain[i]);
+        if (i<3) SerialUSB.print(" ");
+      }
+      SerialUSB.print(dqeol);    
       cmd=DQCMD_HANDLED;
       break;
     case DQCMD_INFO:

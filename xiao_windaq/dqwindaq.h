@@ -81,6 +81,7 @@
 #define DQCMD_OFFSET             0x76
 #define DQCMD_SCALE              0x77
 #define DQCMD_RCHN               0x78
+#define DQCMD_RGAIN              0x79
 #define DQCMD_INVALID            -1
 #define DQCMD_AVAILABLE          1000
 
@@ -131,6 +132,7 @@
 #define DQSTR_OFFSET 	  	       "offset"	
 #define DQSTR_SCALE 	  	       "scale"	
 #define DQSTR_RCHN  	  	       "rchn"	
+#define DQSTR_RGAIN  	  	       "rgain"	
 
 #define DQSTRUCT_REV              1
 
@@ -157,7 +159,7 @@ struct dqCal_type{
   char key [32];
   char serial_n[16];
   char lastCalDate[16];
-  short adc_scale[8];
+  short adc_scale[8]; 
   short adc_offset[8];
 };
 
@@ -171,6 +173,8 @@ extern int dqDefaultCal(void);
 extern int dqLegacyCommand(int cmd);
 extern void dqLoadConfiguration (void);
 
+/*Gain table [1,2,4,5,8,10,20,40,50,80,100,200,400,500,800,1000] */
+
 extern String dqCmd;
 extern String dqPar1;
 extern String dqPar2;
@@ -183,4 +187,5 @@ extern dqCal_type dqCal;
 extern int dqStream;
 extern char dqeol[];
 extern int dqMode;
+extern int dqTotalChannel;
 extern const String dqChannel[8];

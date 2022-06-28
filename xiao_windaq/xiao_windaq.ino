@@ -16,7 +16,6 @@
 //#define INCLUDE_3DACC
 
 #ifdef INCLUDE_3DACC
-#define TOTAL_CHN 7
 /*Add accelerometer to data stream, see https://github.com/Seeed-Studio/Seeed_Arduino_LIS3DHTR*/
 /*With this option on, you will not be able to run normal analog channel at full speed*/
 #include "LIS3DHTR.h"
@@ -25,8 +24,6 @@ LIS3DHTR<TwoWire> LIS; //IIC
 #define WIRE Wire
 
 int I2Cdata[16];
-#else
-#define TOTAL_CHN 4
 #endif
 
 int cmd_type;
@@ -170,6 +167,12 @@ void InitADC(void){
   NVIC_SetPriority(TC3_IRQn, 0);    // Set the Nested Vector Interrupt Controller (NVIC) priority for the TIMER3 to 0 (highest) 
 
   pinMode(9, OUTPUT); //Use A9 as digital ouptut
+
+#ifdef INCLUDE_3DACC
+  dqTotalChannel=7;
+#else
+  dqTotalChannel=4;
+#endif
 
   for (i=0; i<16; i++) ImdADCdata[i]=0;
 }
@@ -405,15 +408,6 @@ void execCommand(int cmd)
       else
           digitalWrite(9, HIGH);
       break;  
-    case DQCMD_RCHN:
-      if (dqPar1.length ()==0){
-        SerialUSB.print(TOTAL_CHN);
-      }
-      else if (dqPar2.length ()==0){
-        SerialUSB.print(dqChannel[dqPar1.toInt()&0x7]);  
-      }
-      SerialUSB.print(dqeol);
-      break;
     default:
       SerialUSB.print("Unsupported command:"+dqCmd);
       SerialUSB.print(dqeol);
