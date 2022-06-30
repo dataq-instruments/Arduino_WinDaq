@@ -16,7 +16,6 @@
 //#define INCLUDE_3DACC
 
 #ifdef INCLUDE_3DACC
-#define TOTAL_CHN 7
 /*Add accelerometer to data stream, see https://github.com/Seeed-Studio/Seeed_Arduino_LIS3DHTR*/
 /*With this option on, you will not be able to run normal analog channel at full speed*/
 #include "LIS3DHTR.h"
@@ -25,8 +24,6 @@ LIS3DHTR<TwoWire> LIS; //IIC
 #define WIRE Wire
 
 int I2Cdata[16];
-#else
-#define TOTAL_CHN 4
 #endif
 
 int cmd_type;
@@ -171,6 +168,12 @@ void InitADC(void){
 
   pinMode(9, OUTPUT); //Use A9 as digital ouptut
 
+#ifdef INCLUDE_3DACC
+  dqTotalChannel=7;
+#else
+  dqTotalChannel=4;
+#endif
+
   for (i=0; i<16; i++) ImdADCdata[i]=0;
 }
 
@@ -190,8 +193,8 @@ void ADC_Handler()
     int adc_reg;
 
     /*digital calibration*/
-    fadc_reg = fadc_reg-DQ_MIDPOINT+(long)dqCal.adc_offset[channellist[ch]];
-    fadc_reg = fadc_reg*(long)dqCal.adc_scale[channellist[ch]];
+    fadc_reg = fadc_reg-DQ_MIDPOINT+(long)dqCal.adc_offset[channellist[ch]][0];
+    fadc_reg = fadc_reg*(long)dqCal.adc_scale[channellist[ch]][0];
     fadc_reg=fadc_reg/DQBASE_SCALE;
 
     if (fadc_reg>DQ_CEILING)fadc_reg=DQ_CEILING;
@@ -344,9 +347,6 @@ void execCommand(int cmd)
         SerialUSB.print(imdstr);
       }
       break;
-    case DQCMD_STREAM:
-      dqStream=dqPar1.toInt();
-      break;
     case DQCMD_START: //Required by Windaq
       start_stop(1);
       break;
@@ -394,25 +394,6 @@ void execCommand(int cmd)
         channellist[i]=dqPar2.toInt()&0xf;
       }
       TrueSampleRate=findTrueSampleRate(RequestedSampleRate); //Changing number of channel may affect the true sample rate
-      break;
-    case DQCMD_DOUT:
-      if (dqPar1.length ()==0){
-        break;
-      }
-      i=dqPar1.toInt();   
-      if (i==0) 
-          digitalWrite(9, LOW);
-      else
-          digitalWrite(9, HIGH);
-      break;  
-    case DQCMD_RCHN:
-      if (dqPar1.length ()==0){
-        SerialUSB.print(TOTAL_CHN);
-      }
-      else if (dqPar2.length ()==0){
-        SerialUSB.print(dqChannel[dqPar1.toInt()&0x7]);  
-      }
-      SerialUSB.print(dqeol);
       break;
     default:
       SerialUSB.print("Unsupported command:"+dqCmd);
@@ -471,4 +452,3 @@ float findTrueSampleRate (float f)
 
   return (float)r;
 }
-
