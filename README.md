@@ -18,15 +18,15 @@ To use the project:
     - Visit https://github.com/Seeed-Studio/Seeed_Arduino_LIS3DHTR
     - Push Code button and select Download ZIP
     - From Arduino IED, follow ArduinoIDE->Sketch->Include Library->Add ZIP Library... to add the downloaded library from above step
-    - In the sketch, uncomment INCLUDE_3DACC to use it. 
-    - **Warning: the input voltage for Arduino® modules is only 0-3.3V!**
+    - In the sketch, uncomment INCLUDE_3DACC to use it.     
 5) Restart Arduino IDE 
 6) Now you can compile and upload the firmware
 7) FYI: https://www.istime.com/wp-content/uploads/2016/07/Make-COM-ports-available.pdf
+8) The major difference between Seeeduino XIAO and Arduino ZERO is their Analog input ports. 
 
-**Need industry grade analog front end? Please consider our starter kit [DI-188](https://www.dataq.com/products/di-188/)**
+**Warning: the input voltage for Arduino® modules is only 0-3.3V!**
 
-The major difference between Seeeduino XIAO and Arduino ZERO is their Analog input ports
+**Need industry grade (+/-10V) analog front end? Please consider our starter kit [DI-188](https://www.dataq.com/products/di-188/)**
 
 <img src="https://www.dataq.com/resources/images/di-188-arduino-daq2.png" width="300" height="300">  <img src="http://cdn.shopify.com/s/files/1/0506/1689/3647/products/ABX00003_01.iso_d6dab5cd-56ad-4eb2-8381-bc1ea6de29fb_866x686.jpg" width="300" height="300">  <img src="https://www.chip1stop.com/img/product/SEED/seeeduino-xiao-preview_1.jpg" width="300" height="300">  
 
