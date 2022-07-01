@@ -24,7 +24,7 @@ To use the project:
 6) Now you can compile and upload the firmware
 7) FYI: https://www.istime.com/wp-content/uploads/2016/07/Make-COM-ports-available.pdf
 
-To add industry grade analog front end, please consider our starter kit [DI-188] (https://www.dataq.com/products/di-188/)
+**Need industry grade analog front end? Please consider our starter kit [DI-188](https://www.dataq.com/products/di-188/)**
 
 The major difference between Seeeduino XIAO and Arduino ZERO is their Analog input ports
 
