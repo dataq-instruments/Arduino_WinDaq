@@ -23,7 +23,7 @@ To use the project:
 6) Now you can compile and upload the firmware
 7) To download WinDaq (to be released in July 10), please visit [run.dataq.com](https://run.dataq.com/)
 
-**Warning: the input voltage for Arduino® modules is only 0-3.3V!**
+**Warning: the input voltage for plain Arduino® modules is only 0-3.3V!**
 
 **Need industry grade (+/-10V) analog front end? Please consider our starter kit [DI-188](https://www.dataq.com/products/di-188/) based on XIAO**
 
