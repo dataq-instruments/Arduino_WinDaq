@@ -21,8 +21,6 @@ To use the project:
     - In the sketch, uncomment INCLUDE_3DACC to use it.     
 5) Restart Arduino IDE 
 6) Now you can compile and upload the firmware
-7) FYI: https://www.istime.com/wp-content/uploads/2016/07/Make-COM-ports-available.pdf
-8) The major difference between Seeeduino XIAO and Arduino ZERO is their Analog input ports. 
 
 **Warning: the input voltage for Arduino® modules is only 0-3.3V!**
 
