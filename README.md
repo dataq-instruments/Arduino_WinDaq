@@ -21,6 +21,7 @@ To use the project:
     - In the sketch, uncomment INCLUDE_3DACC to use it.     
 5) Restart Arduino IDE 
 6) Now you can compile and upload the firmware
+7) To download WinDaq, please visit [run.dataq.com](https://run.dataq.com/)
 
 **Warning: the input voltage for Arduino® modules is only 0-3.3V!**
 
