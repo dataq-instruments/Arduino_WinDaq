@@ -82,6 +82,7 @@
 #define DQCMD_SCALE              0x77
 #define DQCMD_RCHN               0x78
 #define DQCMD_RGAIN              0x79
+#define DQCMD_GGRP               0x7A
 #define DQCMD_INVALID            -1
 #define DQCMD_AVAILABLE          1000
 
@@ -133,10 +134,11 @@
 #define DQSTR_SCALE 	  	       "scale"	
 #define DQSTR_RCHN  	  	       "rchn"	
 #define DQSTR_RGAIN  	  	       "rgain"	
+#define DQSTR_GGRP  	  	       "ggrp"
 
 #define DQSTRUCT_REV              1
 
-/*Norminal digital calibration constants*/
+/*Norminal digital calibration constants for DATAQ's DI-188, if you use Arduino module, please change it to 16384 and 0*/
 #define DQDEFAUL_SCALE            18876
 #define DQDEFAUL_OFFSET           15
 
@@ -189,3 +191,4 @@ extern char dqeol[];
 extern int dqMode;
 extern int dqTotalChannel;
 extern const String dqChannel[8];
+extern int dqGainGroup;

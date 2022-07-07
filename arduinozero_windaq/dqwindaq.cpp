@@ -29,6 +29,9 @@ bool dqScanning=false;
 int dqStream=1;
 int dqMode=1;
 int dqTotalChannel=4;
+int dqGainGroup=0x5555;
+
+/*The following applies to DATAQ's DI-188 module. For Arduino, please change the range to 0, 3 Volt*/
 const String dqChannel[8]={
   "Volt, -10, 10",
   "Volt, -10, 10",
@@ -41,7 +44,7 @@ const String dqChannel[8]={
 };
 
 const int dqGain[8]={
-  1,1,1,1,1,1,1,1
+  1,1,1,1,7,7,7,1
 };
 
 static int state=0;
@@ -66,22 +69,6 @@ int dqEEPROMInit(void)
   }
 }
 
-
-/*This is to be used to find out the true scale/offset*/
-/*int dqDropCal(void)
-{
-  int i;
-  uint8_t *pc =(uint8_t *)&dqCal;
-
-  for (int i=0; i<sizeof(dqCal); i++) {
-    pc[i]=EEPROM.read(i);
-  }
-
-  for (i=0; i<8; i++){
-    dqCal.adc_scale[i]=DQBASE_SCALE;
-    dqCal.adc_offset[i]=0;
-  }
-}*/
 
 int dqReceiveChar (int c)
 {
@@ -232,6 +219,7 @@ int dqMatchCommand(String dqCmd){
     else if (dqCmd ==DQSTR_OFFSET) command = DQCMD_OFFSET;
     else if (dqCmd ==DQSTR_RCHN) command = DQCMD_RCHN;
     else if (dqCmd ==DQSTR_RGAIN) command = DQCMD_RGAIN;
+    else if (dqCmd ==DQSTR_GGRP) command = DQCMD_GGRP;
     else command=DQCMD_INVALID;
      
     return command;
@@ -303,6 +291,11 @@ int dqLegacyCommand(int cmd)
       else if (dqPar2.length ()==0){
         SerialUSB.print(dqChannel[dqPar1.toInt()&0x7]);  
       }
+      SerialUSB.print(dqeol);
+      cmd=DQCMD_HANDLED;
+      break;    
+    case DQCMD_GGRP:
+      SerialUSB.print(dqGainGroup);  
       SerialUSB.print(dqeol);
       cmd=DQCMD_HANDLED;
       break;    
