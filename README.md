@@ -25,7 +25,7 @@ To use the project:
 
 **Warning: the input voltage for plain Arduino® modules is only 0-3V!**
 
-**Need industry grade (+/-10V range, 30VMax) analog front end? Please consider our XIAO-based starter kit [DI-188](https://www.dataq.com/products/di-188/)**
+**Need industry-grade front end of +/-10V range with 1MΩ input impedance? Please consider our XIAO-based starter kit [DI-188](https://www.dataq.com/products/di-188/)**
 
 <img src="https://www.dataq.com/resources/images/di-188-arduino-daq2.png" width="300" height="300">  <img src="http://cdn.shopify.com/s/files/1/0506/1689/3647/products/ABX00003_01.iso_d6dab5cd-56ad-4eb2-8381-bc1ea6de29fb_866x686.jpg" width="300" height="300"> 
 
