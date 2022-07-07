@@ -29,6 +29,9 @@ bool dqScanning=false;
 int dqStream=1;
 int dqMode=1;
 int dqTotalChannel=4;
+int dqGainGroup=0x5555;
+
+/*The following applies to DATAQ's DI-188 module. For Arduino, please change the range to 0, 3 Volt*/
 const String dqChannel[8]={
   "Volt, -10, 10",
   "Volt, -10, 10",
@@ -41,7 +44,7 @@ const String dqChannel[8]={
 };
 
 const int dqGain[8]={
-  1,1,1,1,1,1,1,1
+  1,1,1,1,7,7,7,1
 };
 
 static int state=0;
@@ -51,7 +54,7 @@ char dqeol[4] = "\r";
 
 int dqEEPROMInit(void)
 {
-  int i;
+  int i, j;
   dqCal.structrev=DQSTRUCT_REV;  
   dqCal.hardwarerev=0;
   sprintf(dqCal.key, "0123456789ABCDEF"); 
@@ -59,27 +62,13 @@ int dqEEPROMInit(void)
   sprintf(dqCal.lastCalDate, "6214F19E"); //2022/2/22: 2:22:22
 
   for (i=0; i<8; i++){
-    dqCal.adc_scale[i]=DQDEFAUL_SCALE;
-    dqCal.adc_offset[i]=DQDEFAUL_OFFSET;
+    for (j=0; j<4; j++){
+      dqCal.adc_scale[i][j]=DQDEFAUL_SCALE;
+      dqCal.adc_offset[i][j]=DQDEFAUL_OFFSET;
+    }
   }
 }
 
-
-/*This is to be used to find out the true scale/offset*/
-int dqDropCal(void)
-{
-  int i;
-  uint8_t *pc =(uint8_t *)&dqCal;
-
-  for (int i=0; i<sizeof(dqCal); i++) {
-    pc[i]=EEPROM.read(i);
-  }
-
-  for (i=0; i<8; i++){
-    dqCal.adc_scale[i]=DQBASE_SCALE;
-    dqCal.adc_offset[i]=0;
-  }
-}
 
 int dqReceiveChar (int c)
 {
@@ -230,6 +219,7 @@ int dqMatchCommand(String dqCmd){
     else if (dqCmd ==DQSTR_OFFSET) command = DQCMD_OFFSET;
     else if (dqCmd ==DQSTR_RCHN) command = DQCMD_RCHN;
     else if (dqCmd ==DQSTR_RGAIN) command = DQCMD_RGAIN;
+    else if (dqCmd ==DQSTR_GGRP) command = DQCMD_GGRP;
     else command=DQCMD_INVALID;
      
     return command;
@@ -304,6 +294,11 @@ int dqLegacyCommand(int cmd)
       SerialUSB.print(dqeol);
       cmd=DQCMD_HANDLED;
       break;    
+    case DQCMD_GGRP:
+      SerialUSB.print(dqGainGroup);  
+      SerialUSB.print(dqeol);
+      cmd=DQCMD_HANDLED;
+      break;    
     case DQCMD_RGAIN:
       for (i=0; i<dqTotalChannel; i++){
         SerialUSB.print(dqGain[i]);
@@ -374,23 +369,25 @@ int dqLegacyCommand(int cmd)
       cmd=DQCMD_HANDLED;
       break;
     case DQCMD_SCALE:  
-      if ((dqPar1.length ()==0)||(dqPar2.length ()==0)){
+      if ((dqPar1.length ()==0)||(dqPar2.length ()==0)||(dqPar3.length ()==0)){
         cmd=DQCMD_HANDLED;
         break;
       }
       i=dqPar1.toInt();
-      if ((i>=0)&&(i<8))
-        dqCal.adc_scale[i]=dqPar2.toInt();
+      j=dqPar2.toInt();
+      if (((i>=0)&&(i<8))&&((j>=0)&&(j<4)))
+        dqCal.adc_scale[i][j]=dqPar3.toInt();
       cmd=DQCMD_HANDLED;        
       break;    
     case DQCMD_OFFSET:
-      if ((dqPar1.length ()==0)||(dqPar2.length ()==0)){
+      if ((dqPar1.length ()==0)||(dqPar2.length ()==0)||(dqPar3.length ()==0)){
         cmd=DQCMD_HANDLED;
         break;
       }
       i=dqPar1.toInt();
-      if ((i>=0)&&(i<8))
-        dqCal.adc_offset[i]=dqPar2.toInt();
+      j=dqPar2.toInt();
+      if (((i>=0)&&(i<8))&&((j>=0)&&(j<4)))
+        dqCal.adc_offset[i][j]=dqPar3.toInt();
       cmd=DQCMD_HANDLED;
       break;
     case DQCMD_WFLASH:  
@@ -413,6 +410,17 @@ int dqLegacyCommand(int cmd)
       }
       cmd=DQCMD_HANDLED;
       break;
+    case DQCMD_DOUT:
+      if (dqPar1.length ()==0){
+        break;
+      }
+      i=dqPar1.toInt();   
+      if (i==0) 
+          digitalWrite(9, LOW);
+      else
+          digitalWrite(9, HIGH);
+      cmd=DQCMD_HANDLED;    
+      break;      
     case DQCMD_RFLASH:
       if (dqPar1.length ()>0){
         if (dqPar1=="init"){
@@ -427,7 +435,11 @@ int dqLegacyCommand(int cmd)
       }
       SerialUSB.print("\r");
       cmd=DQCMD_HANDLED;
-      break;      
+      break; 
+    case DQCMD_STREAM:
+      dqStream=dqPar1.toInt();
+      cmd=DQCMD_HANDLED;
+      break;           
     default:
       break;
   }

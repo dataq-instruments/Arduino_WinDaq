@@ -16,8 +16,8 @@
 //#define INCLUDE_3DACC
 
 #ifdef INCLUDE_3DACC
-/*Add accelerometer to data stream, see https://github.com/Seeed-Studio/Seeed_Arduino_LIS3DHTR*/
-/*With this option on, you will not be able to run normal analog channel at full speed*/
+/*Add accelerometer to data stream, see https://github.com/Seeed-Studio/Seeed_Arduino_LIS3DHTR
+With this option on, you will not be able to run normal analog channel at full speed*/
 #include "LIS3DHTR.h"
 #include <Wire.h>
 LIS3DHTR<TwoWire> LIS; //IIC
@@ -73,6 +73,7 @@ void setup() {
   LIS.begin(WIRE, LIS3DHTR_ADDRESS_UPDATED); //IIC init
   delay(100);
   LIS.setOutputDataRate(LIS3DHTR_DATARATE_100HZ);
+  dqGainGroup=0x75; //Four independent gain chanels, three group gain channels
 #endif
 }
 
@@ -193,8 +194,8 @@ void ADC_Handler()
     int adc_reg;
 
     /*digital calibration*/
-    fadc_reg = fadc_reg-DQ_MIDPOINT+(long)dqCal.adc_offset[channellist[ch]];
-    fadc_reg = fadc_reg*(long)dqCal.adc_scale[channellist[ch]];
+    fadc_reg = fadc_reg-DQ_MIDPOINT+(long)dqCal.adc_offset[channellist[ch]][0];
+    fadc_reg = fadc_reg*(long)dqCal.adc_scale[channellist[ch]][0];
     fadc_reg=fadc_reg/DQBASE_SCALE;
 
     if (fadc_reg>DQ_CEILING)fadc_reg=DQ_CEILING;
@@ -347,9 +348,6 @@ void execCommand(int cmd)
         SerialUSB.print(imdstr);
       }
       break;
-    case DQCMD_STREAM:
-      dqStream=dqPar1.toInt();
-      break;
     case DQCMD_START: //Required by Windaq
       start_stop(1);
       break;
@@ -397,17 +395,25 @@ void execCommand(int cmd)
         channellist[i]=dqPar2.toInt()&0xf;
       }
       TrueSampleRate=findTrueSampleRate(RequestedSampleRate); //Changing number of channel may affect the true sample rate
+      #ifdef INCLUDE_3DACC
+        if ((dqPar2.toInt()&0xf)>=MAXADCHANNEL){ /*Check for non-normal ADC channels*/
+          switch ((dqPar2.toInt()>>8)&0x3){
+            case 1:
+              LIS.setFullScaleRange(LIS3DHTR_RANGE_8G); //Gain of 
+              break;
+            case 2:
+              LIS.setFullScaleRange(LIS3DHTR_RANGE_4G); //Gain of 
+              break;
+            case 3:
+              LIS.setFullScaleRange(LIS3DHTR_RANGE_2G); //Gain of 
+              break;
+            default:
+              LIS.setFullScaleRange(LIS3DHTR_RANGE_16G); //Gain of 
+              break;
+          }
+        }
+      #endif
       break;
-    case DQCMD_DOUT:
-      if (dqPar1.length ()==0){
-        break;
-      }
-      i=dqPar1.toInt();   
-      if (i==0) 
-          digitalWrite(9, LOW);
-      else
-          digitalWrite(9, HIGH);
-      break;  
     default:
       SerialUSB.print("Unsupported command:"+dqCmd);
       SerialUSB.print(dqeol);
@@ -465,4 +471,3 @@ float findTrueSampleRate (float f)
 
   return (float)r;
 }
-
