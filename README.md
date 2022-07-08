@@ -21,7 +21,7 @@ To use the project:
     - In the sketch, uncomment INCLUDE_3DACC to use it.     
 5) Restart Arduino IDE 
 6) Now you can compile and upload the firmware
-7) To download WinDaq, please visit [run.dataq.com](https://www.dataq.com/products/windaq/). WinDaq is a proprietary commercial software from DATAQ, and it allows free personal home use only under this Arduino project
+7) To download WinDaq, please click [www.dataq.com](https://www.dataq.com/products/windaq/). WinDaq is a proprietary commercial software from DATAQ, and it allows free personal home use only under this Arduino project
 
 **Warning: the input voltage for plain Arduino® modules is limited to only 0-3V!**
 
