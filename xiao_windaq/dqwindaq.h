@@ -83,6 +83,7 @@
 #define DQCMD_RCHN               0x78
 #define DQCMD_RGAIN              0x79
 #define DQCMD_GGRP               0x7A
+#define DQCMD_CJCDELTA           0x7B
 #define DQCMD_INVALID            -1
 #define DQCMD_AVAILABLE          1000
 
@@ -135,6 +136,7 @@
 #define DQSTR_RCHN  	  	       "rchn"	
 #define DQSTR_RGAIN  	  	       "rgain"	
 #define DQSTR_GGRP  	  	       "ggrp"
+#define DQSTR_CJCDELTA           "cjcdelta"
 
 #define DQSTRUCT_REV              1
 

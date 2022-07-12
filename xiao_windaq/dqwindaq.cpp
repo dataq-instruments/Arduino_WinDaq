@@ -439,7 +439,12 @@ int dqLegacyCommand(int cmd)
     case DQCMD_STREAM:
       dqStream=dqPar1.toInt();
       cmd=DQCMD_HANDLED;
-      break;           
+      break; 
+    case DQCMD_CJCDELTA:
+      SerialUSB.print("NA");
+      SerialUSB.print(dqeol);
+      cmd=DQCMD_HANDLED;
+      break;
     default:
       break;
   }
