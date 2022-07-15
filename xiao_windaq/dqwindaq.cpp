@@ -25,11 +25,12 @@ String dqPar3;
 String dqPar4;
 bool dqWindaq=false;
 char dqCmdStr[64];
-bool dqScanning=false;
+volatile bool dqScanning=false;
 int dqStream=1;
 int dqMode=1;
 int dqTotalChannel=4;
 int dqGainGroup=0x5555;
+uint32_t samd21_serno[4];
 
 /*The following applies to DATAQ's DI-188 module. For Arduino, please change the range to 0, 3 Volt*/
 const String dqChannel[8]={
@@ -52,13 +53,21 @@ static int cmdStrindex=0;
 dqCal_type dqCal;
 char dqeol[4] = "\r";
 
+void get_samd21_serno(uint32_t s[4]) {
+  s[0] = *SERNO0;
+  s[1] = SERNO1t3[0];
+  s[2] = SERNO1t3[1];
+  s[3] = SERNO1t3[2];
+}
+
 int dqEEPROMInit(void)
 {
   int i, j;
   dqCal.structrev=DQSTRUCT_REV;  
   dqCal.hardwarerev=0;
+  get_samd21_serno(samd21_serno);
   sprintf(dqCal.key, "0123456789ABCDEF"); 
-  sprintf(dqCal.serial_n, "88888888");  
+  sprintf(dqCal.serial_n, "%08X",  samd21_serno[0]+(samd21_serno[3]&0xfffff));  //Create an unique serial number
   sprintf(dqCal.lastCalDate, "6214F19E"); //2022/2/22: 2:22:22
 
   for (i=0; i<8; i++){
@@ -68,7 +77,6 @@ int dqEEPROMInit(void)
     }
   }
 }
-
 
 int dqReceiveChar (int c)
 {

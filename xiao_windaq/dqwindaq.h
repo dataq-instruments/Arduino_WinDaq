@@ -141,8 +141,8 @@
 #define DQSTRUCT_REV              1
 
 /*Norminal digital calibration constants for DATAQ's DI-188, if you use Arduino module, please change it to 16384 and 0*/
-#define DQDEFAUL_SCALE            18876
-#define DQDEFAUL_OFFSET           15
+#define DQDEFAUL_SCALE            18850
+#define DQDEFAUL_OFFSET           55
 
 /*Calibration constants*/
 #define DQBASE_SCALE              16384
@@ -186,7 +186,7 @@ extern String dqPar3;
 extern String dqPar4;
 extern bool dqWindaq;
 extern char dqCmdStr[];
-extern bool dqScanning;
+extern volatile bool dqScanning;
 extern dqCal_type dqCal;
 extern int dqStream;
 extern char dqeol[];

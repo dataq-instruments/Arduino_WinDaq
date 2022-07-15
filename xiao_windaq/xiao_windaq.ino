@@ -38,14 +38,14 @@ float TrueSampleRate=1.0;
 int number;
 int cnn=0;
 
-long adcAve[8];
+volatile long adcAve[8];
 long adcDec;
 long adcDec1;
-long adcDecCounter[8];
+volatile long adcDecCounter[8];
 
 char ADCdata[ADC_BUFFER];
 
-int ImdADCdata[32];
+volatile int ImdADCdata[32];
 int wADCdataIdx=0;
 int rADCdataIdx=0;
 bool SendS0=false;
@@ -136,7 +136,7 @@ void InitADC(void){
   int i;
   ADC->INPUTCTRL.bit.MUXPOS = g_APinDescription[channellist[0]].ulADCChannelNumber;                   // Set the analog input to A1, because plusPin =1?
   ADC->INPUTCTRL.bit.MUXNEG = ADC_INPUTCTRL_MUXNEG_GND_Val;
-  ADC->REFCTRL.bit.REFSEL=ADC_REFCTRL_REFSEL_INTVCC1_Val;
+  ADC->REFCTRL.bit.REFSEL=ADC_REFCTRL_REFSEL_INTVCC1_Val; //ADC_REFCTRL_REFSEL_INT1V_Val    
     
   ADC->INPUTCTRL.bit.GAIN =ADC_INPUTCTRL_GAIN_DIV2_Val; //default is 1/2 gain
   ADC->INPUTCTRL.bit.INPUTOFFSET =0; //Watch out, this is NOT the offset adjustment for ADC reading!
@@ -150,7 +150,7 @@ void InitADC(void){
                    ADC_CTRLB_RESSEL_16BIT;           // Set the ADC resolution to 16 bits
   while(ADC->STATUS.bit.SYNCBUSY);                   // Wait for synchronization  
 
-  ADC->AVGCTRL.reg = ADC_AVGCTRL_SAMPLENUM_16 |      //256 for 1 khz 128 for 2khz, 16 for 16K, lower number reduces the amplitude (see page 787 of data sheet about accumulation)
+  ADC->AVGCTRL.reg = ADC_AVGCTRL_SAMPLENUM_32 |      //256 for 1 khz 128 for 2khz, 16 for 16K, lower number reduces the amplitude (see page 787 of data sheet about accumulation)
                      ADC_AVGCTRL_ADJRES(8);
   while(ADC->STATUS.bit.SYNCBUSY);                   // Wait for synchronization  
   
@@ -181,17 +181,17 @@ void InitADC(void){
 void adcPacer_isr() { 
   if  (dqScanning)
     ADC->SWTRIG.bit.START = 1;                         // Initiate a software trigger to start an ADC conversion
-}
+ 
 
 void ADC_Handler()
 {
   int adc_reg ;                       // Results counter
   int i, j;
+  long fadc_reg;
 
   if (ADC->INTFLAG.bit.RESRDY)                       // Check if the result ready (RESRDY) flag has been set
   { 
-    long fadc_reg =(long)ADC->RESULT.reg;     
-    int adc_reg;
+    fadc_reg=(long)ADC->RESULT.reg;  
 
     /*digital calibration*/
     fadc_reg = fadc_reg-DQ_MIDPOINT+(long)dqCal.adc_offset[channellist[ch]][0];
@@ -227,6 +227,7 @@ void ADC_Handler()
       ImdADCdata[ch]=fadc_reg;
       
       if (dqWindaq){
+        fadc_reg=fadc_reg&0XFFF0;
         adc_reg = (int)fadc_reg;
         adc_reg=adc_reg^DQ_INVERTSIGN;
       }
@@ -424,6 +425,7 @@ void execCommand(int cmd)
 void start_stop(int i){
   if (i!=0){
     dqScanning=true;
+    
     ADCPacer_Timer.start();
   }
   else  {
