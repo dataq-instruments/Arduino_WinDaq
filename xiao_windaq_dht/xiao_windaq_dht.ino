@@ -121,13 +121,13 @@ void loop() {
     f=dht.readHumidity(false);
     
     if(!isnan(f)){
-      /*Convert to binary data representing "%, 0, 100"*/
-      DHTdata[0]=(f-100/2)*(32768./100);
+      /*Convert to binary data representing "%, 20, 90"*/
+      DHTdata[0]=(f-110/2)*(32768./70);
     }
     f=dht.readTemperature(true, false); //Returns in F
 
     if(!isnan(f)){
-      /*Convert to binary data representing "F, 32, 120"*/
+      /*Convert to binary data representing "F, 32, 122"*/
       DHTdata[1]=(f-(122+32)/2)*(32768./(122-32));
     }
 #endif    
