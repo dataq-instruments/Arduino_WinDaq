@@ -130,8 +130,8 @@ void loop() {
     f=dht.readTemperature(true, false); //Returns in F
 
     if(!isnan(f)){
-      /*Convert to binary data representing "F, 32, 140"*/
-      DHTdata[1]=(f-(140+32)/2)*(32768./(140-32));
+      /*Convert to binary data representing "F, 32, 120"*/
+      DHTdata[1]=(f-(122+32)/2)*(32768./(122-32));
     }
 #endif    
   }

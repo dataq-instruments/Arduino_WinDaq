@@ -39,7 +39,7 @@ const String dqChannel[8]={
   "Volt, -10, 10",
   "Volt, -10, 10",
   "%, 0, 100",
-  "F, 32, 140",
+  "F, 32, 122",
 };
 
 const int dqGain[8]={
