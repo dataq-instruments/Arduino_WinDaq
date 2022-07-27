@@ -117,10 +117,7 @@ void loop() {
         }
       }
     }
-#ifdef INCLUDE_DHT2 
-  
-  //if (taketurn==0){
-  //  taketurn=1;
+#ifdef INCLUDE_DHT
     f=dht.readHumidity(false);
     
     if(!isnan(f)){
