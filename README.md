@@ -1,7 +1,7 @@
 # Arduino_To_WinDaq Chart Recorder
 Originated from our DI-188, this open source project turns any **Arduino®** (Arduino Zero is used here) or **Arduino®-compatible** module (Seeeduino XIAO is used here) to a [WinDaq](https://www.dataq.com/products/windaq/)-based data acquisition chart recorder. It supports up to 16 analog channels (4 analog channels is demonstrated in the source codes) to accept readings from on-board ADC or sensors connected to grove connectors. **It supports WinDaq addons like [FFT, Spectrogram, Smart Meters, Gauge display, various trigger modes, calculated channel](http://www.ultimaserial.com/wdspectrum.html), [XY plot](https://www.dataq.com/products/windaq/add_ons/index.htm), and [Excel link](https://www.dataq.com/products/windaq/windaqxl/product.html),**
 
-To use the project:
+**To use the project:**
 1) Installing Arduino IDE 2.0. Please follow instruction from https://www.arduino.cc/en/software#experimental-software 
 2) If you don't use XIAO module, jump to step 3)
     -  following instruction in https://wiki.seeedstudio.com/Seeeduino-XIAO/#:~:text=Install%20it.&text=After%20installing%20the%20board%2C%20click,the%20Tools%20%7C%20Serial%20Port%20menu. 
@@ -18,7 +18,7 @@ To use the project:
 5) Now you can compile and upload the firmware
 6) To download WinDaq, please click [www.dataq.com](https://www.dataq.com/products/windaq/). WinDaq is a proprietary commercial software from DATAQ, and it allows free personal home use only under this Arduino project
 
-Projects to interface with various sensors
+**Projects to interface with various sensors**
 1) 3-axis digital accelerometer LIS3DHTR (See demo screen shot below)
     - The source is included in the base project
     - Visit https://github.com/Seeed-Studio/Seeed_Arduino_LIS3DHTR
