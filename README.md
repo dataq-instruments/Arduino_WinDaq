@@ -14,14 +14,22 @@ To use the project:
     - Visit https://github.com/cmaglie/FlashStorage
     - Push Code button and select Download ZIP
     - From Arduino IDE, follow ArduinoIDE->Sketch->Include Library->Add ZIP Library... to add the downloaded library from above step
-4) Optional (See demo screen shot below) to add 3-Axis Digital Accelerometers library: 
+4) Restart Arduino IDE 
+5) Now you can compile and upload the firmware
+6) To download WinDaq, please click [www.dataq.com](https://www.dataq.com/products/windaq/). WinDaq is a proprietary commercial software from DATAQ, and it allows free personal home use only under this Arduino project
+
+Projects to interface with various sensors
+1) 3-axis digital accelerometer LIS3DHTR (See demo screen shot below)
+    - The source is included in the base project
     - Visit https://github.com/Seeed-Studio/Seeed_Arduino_LIS3DHTR
     - Push Code button and select Download ZIP
     - From Arduino IED, follow ArduinoIDE->Sketch->Include Library->Add ZIP Library... to add the downloaded library from above step
-    - In the sketch, uncomment INCLUDE_3DACC to use it.     
-5) Restart Arduino IDE 
-6) Now you can compile and upload the firmware
-7) To download WinDaq, please click [www.dataq.com](https://www.dataq.com/products/windaq/). WinDaq is a proprietary commercial software from DATAQ, and it allows free personal home use only under this Arduino project
+    - In the sketch, uncomment INCLUDE_3DACC to use it.   
+2) Environmental temperature and humidity sensor (DHT11)
+    - The source can be found in [xiao_windaq-dht](https://github.com/dataq-instruments/Arduino_WinDaq/tree/main/xiao_windaq_dht)
+    - Visit https://github.com/adafruit/DHT-sensor-library
+    - Push Code button and select Download ZIP
+    - From Arduino IED, follow ArduinoIDE->Sketch->Include Library->Add ZIP Library... to add the downloaded library from above step
 
 **Warning: the input voltage for plain Arduino® modules is limited to only 0-3V!**
 
