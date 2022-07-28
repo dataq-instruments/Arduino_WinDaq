@@ -2,9 +2,9 @@
 Originated from our DI-188, this open source project turns any **Arduino®** (Arduino Zero is used here) or **Arduino®-compatible** module (Seeeduino XIAO is used here) to a [WinDaq](https://www.dataq.com/products/windaq/)-based data acquisition chart recorder. It supports up to 16 analog channels (4 analog channels is demonstrated in the source codes) to accept readings from on-board ADC or sensors connected to grove connectors. **It supports WinDaq addons like [FFT, Spectrogram, Smart Meters, Gauge display, various trigger modes, calculated channel](http://www.ultimaserial.com/wdspectrum.html), [XY plot](https://www.dataq.com/products/windaq/add_ons/index.htm), and [Excel link](https://www.dataq.com/products/windaq/windaqxl/product.html),**
 
 **To use the project:**
-1) Installing Arduino IDE 2.0. Please follow instruction from https://www.arduino.cc/en/software#experimental-software 
+1) Installing Arduino IDE 2.0. Please [follow this instruction](https://www.arduino.cc/en/software#experimental-software) 
 2) If you don't use XIAO module, jump to step 3)
-    -  following instruction in https://wiki.seeedstudio.com/Seeeduino-XIAO/#:~:text=Install%20it.&text=After%20installing%20the%20board%2C%20click,the%20Tools%20%7C%20Serial%20Port%20menu. 
+    -  [following instruction here](https://wiki.seeedstudio.com/Seeeduino-XIAO/#:~:text=Install%20it.&text=After%20installing%20the%20board%2C%20click,the%20Tools%20%7C%20Serial%20Port%20menu. )
     - Restart Arduino IDE to allow XIAO to be added to the search engine
     - From ArduinoIDE->Tools->Boards->Board Manager, type in XIAO or Arduino Zero and let IDE download all libraries for your module
        - When you upgrade Arduino IDE, you may need to upgrade the libraries as well
