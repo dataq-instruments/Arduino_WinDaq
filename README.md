@@ -18,20 +18,20 @@ Originated from our DI-188, this open source project turns any **Arduino®** (Ar
 5) Now you can compile and upload the firmware
 6) To download WinDaq, please click [www.dataq.com](https://www.dataq.com/products/windaq/). WinDaq is a proprietary commercial software from DATAQ, and it allows free personal home use only under this Arduino project
 
-**Projects to interface with various sensors**
+**DI-188 Projects to interface with various sensors**
 1) 3-axis digital accelerometer LIS3DHTR (See demo screen shot below)
     - The source is included in the base project
     - Visit https://github.com/Seeed-Studio/Seeed_Arduino_LIS3DHTR
     - Push Code button and select Download ZIP
     - From Arduino IED, follow ArduinoIDE->Sketch->Include Library->Add ZIP Library... to add the downloaded library from above step
     - In the sketch, uncomment INCLUDE_3DACC to use it.  
-    - LIS3DHTR module should be conneced to I2C port 
+    - LIS3DHTR module should be conneced to a I2C port of DI-188
 2) Environmental temperature and humidity sensor (DHT11)
     - The source can be found in [xiao_windaq-dht](https://github.com/dataq-instruments/Arduino_WinDaq/tree/main/xiao_windaq_dht)
     - Visit https://github.com/adafruit/DHT-sensor-library
     - Push Code button and select Download ZIP
     - From Arduino IED, follow ArduinoIDE->Sketch->Include Library->Add ZIP Library... to add the downloaded library from above step
-    - DHT11 module should be connected to DIG (D9) port
+    - DHT11 module should be connected to the DIG port of DI-188
 
 **Warning: the input voltage for plain Arduino® modules is limited to only 0-3V!**
 
