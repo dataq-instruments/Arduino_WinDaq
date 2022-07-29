@@ -1,4 +1,4 @@
-Iterface with DHT, environmental temperature and humitity sensor
+Interface with DHT11, an environmental temperature and humitity sensor
 
 Environmental temperature and humidity sensor (DHT11), which can be [purchased online](https://www.seeedstudio.com/Grove-Temperature-Humidity-Sensor-DHT11.html):
 
