@@ -1,6 +1,7 @@
 Iterface with DHT, environmental temperature and humitity sensor
 
-Environmental temperature and humidity sensor (DHT11), which can be [purchased online](https://www.seeedstudio.com/Grove-Temperature-Humidity-Sensor-DHT11.html) 
+Environmental temperature and humidity sensor (DHT11), which can be [purchased online](https://www.seeedstudio.com/Grove-Temperature-Humidity-Sensor-DHT11.html):
+
     - The source can be found in [xiao_windaq-dht](https://github.com/dataq-instruments/Arduino_WinDaq/tree/main/xiao_windaq_dht)
     - Visit https://github.com/adafruit/DHT-sensor-library
     - Push Code button and select Download ZIP
