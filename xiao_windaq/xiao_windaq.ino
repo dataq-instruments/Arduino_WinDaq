@@ -181,7 +181,7 @@ void InitADC(void){
 void adcPacer_isr() { 
   if  (dqScanning)
     ADC->SWTRIG.bit.START = 1;                         // Initiate a software trigger to start an ADC conversion
- 
+} 
 
 void ADC_Handler()
 {
