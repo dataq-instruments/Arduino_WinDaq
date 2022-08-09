@@ -36,7 +36,7 @@ Originated from our DI-188, this open source project turns any **Arduino®** (Ar
     - DHT11 module should be connected to the DIG port of DI-188
 3) Environmental temperature and Air Pressure Sensor (DSP310)
     - Range: -40 to 85 C +/-0.5C, 300 to 1200 hPa +/-1hPa 
-    - The source can be found in [xiao_windaq-dsp310](https://github.com/dataq-instruments/Arduino_WinDaq/tree/main/xiao_windaq_dsp310)
+    - The source can be found in [xiao_windaq-dsp310](https://github.com/dataq-instruments/Arduino_WinDaq/tree/main/xiao_windaq_dps310)
     - Visit https://github.com/adafruit/Adafruit_DPS310
     - Push Code button and select Download ZIP
     - From Arduino IED, follow ArduinoIDE->Sketch->Include Library->Add ZIP Library... to add the downloaded library from above step
