@@ -16,7 +16,7 @@ Originated from our DI-188, this open source project turns any **Arduino®** (Ar
     - From Arduino IDE, follow ArduinoIDE->Sketch->Include Library->Add ZIP Library... to add the downloaded library from above step
 4) Restart Arduino IDE 
 5) Now you can compile and upload the firmware
-6) To download WinDaq, please click [www.dataq.com](https://www.dataq.com/products/windaq/). WinDaq is a proprietary commercial software from DATAQ, and it allows free personal home use only under this Arduino project
+6) To download WinDaq, please click [www.dataq.com](https://www.dataq.com/products/windaq/). WinDaq is a proprietary commercial software from DATAQ, and it allows free personal home use only under this Arduino project. 
 
 **DI-188 Projects to interface with various sensors**
 1) 3-axis digital accelerometer LIS3DHTR (See demo screen shot below)
@@ -41,7 +41,7 @@ Originated from our DI-188, this open source project turns any **Arduino®** (Ar
     - Push Code button and select Download ZIP
     - From Arduino IED, follow ArduinoIDE->Sketch->Include Library->Add ZIP Library... to add the downloaded library from above step
     - DPS module should be connected to a I2C port of DI-188
-    - 
+    
 **Warning: the input voltage for plain Arduino® modules is limited to only 0-3V!**
 
 **Need industry-grade front end of +/-10V range (30V Max) with 1MΩ input impedance? Please consider our XIAO-based starter kit [DI-188](https://www.dataq.com/products/di-188/)**
