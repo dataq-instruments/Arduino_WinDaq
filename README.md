@@ -20,6 +20,7 @@ Originated from our DI-188, this open source project turns any **Arduino®** (Ar
 
 **DI-188 Projects to interface with various sensors**
 1) 3-axis digital accelerometer LIS3DHTR (See demo screen shot below)
+    - Range: +/-2,4,8,16G
     - The source is included in the base project
     - Visit https://github.com/Seeed-Studio/Seeed_Arduino_LIS3DHTR
     - Push Code button and select Download ZIP
@@ -27,12 +28,20 @@ Originated from our DI-188, this open source project turns any **Arduino®** (Ar
     - In the sketch, uncomment INCLUDE_3DACC to use it.  
     - LIS3DHTR module should be conneced to a I2C port of DI-188
 2) Environmental temperature and humidity sensor (DHT11)
+    - Range: 0 to 50C +/-2C, 20 to 90%RH+/-5%RH
     - The source can be found in [xiao_windaq-dht](https://github.com/dataq-instruments/Arduino_WinDaq/tree/main/xiao_windaq_dht)
     - Visit https://github.com/adafruit/DHT-sensor-library
     - Push Code button and select Download ZIP
     - From Arduino IED, follow ArduinoIDE->Sketch->Include Library->Add ZIP Library... to add the downloaded library from above step
     - DHT11 module should be connected to the DIG port of DI-188
-
+3) Environmental temperature and Air Pressure Sensor (DSP310)
+    - Range: -40 to 85 C +/-0.5C, 300 to 1200 hPa +/-1hPa 
+    - The source can be found in [xiao_windaq-dsp310](https://github.com/dataq-instruments/Arduino_WinDaq/tree/main/xiao_windaq_dsp310)
+    - Visit https://github.com/adafruit/Adafruit_DPS310
+    - Push Code button and select Download ZIP
+    - From Arduino IED, follow ArduinoIDE->Sketch->Include Library->Add ZIP Library... to add the downloaded library from above step
+    - DPS module should be connected to a I2C port of DI-188
+    - 
 **Warning: the input voltage for plain Arduino® modules is limited to only 0-3V!**
 
 **Need industry-grade front end of +/-10V range (30V Max) with 1MΩ input impedance? Please consider our XIAO-based starter kit [DI-188](https://www.dataq.com/products/di-188/)**
