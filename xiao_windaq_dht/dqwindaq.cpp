@@ -308,7 +308,7 @@ int dqLegacyCommand(int cmd)
     case DQCMD_RGAIN:
       for (i=0; i<dqTotalChannel; i++){
         SerialUSB.print(dqGain[i]);
-        if (i<3) SerialUSB.print(" ");
+        SerialUSB.print(" ");
       }
       SerialUSB.print(dqeol);    
       cmd=DQCMD_HANDLED;
