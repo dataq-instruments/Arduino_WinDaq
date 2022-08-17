@@ -41,7 +41,9 @@ Originated from our DI-188, this open source project turns any **Arduino®** (Ar
     - Push Code button and select Download ZIP
     - From Arduino IED, follow ArduinoIDE->Sketch->Include Library->Add ZIP Library... to add the downloaded library from above step
     - DPS module should be connected to a I2C port of DI-188
-    
+4) A turn-key software package to facilitate the study of seismological concepts in middle school through introductory undergraduate classrooms
+    - Download and run the software from https://www.iris.edu/hq/inclass/software-web-app/jamaseis
+
 **Warning: the input voltage for plain Arduino® modules is limited to only 0-3V!**
 
 **Need industry-grade front end of +/-10V range (30V Max) with 1MΩ input impedance? Please consider our XIAO-based starter kit [DI-188](https://www.dataq.com/products/di-188/)**
