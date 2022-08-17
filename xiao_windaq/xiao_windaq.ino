@@ -13,18 +13,39 @@
 #include "dqwindaq.h"
 #include <FlashAsEEPROM.h>
 
+//#define HISPEED
+//#define HIRES
 //#define INCLUDE_3DACC
 
 #ifdef INCLUDE_3DACC
+#undef HISPEED
 /*Add accelerometer to data stream, see https://github.com/Seeed-Studio/Seeed_Arduino_LIS3DHTR
 With this option on, you will not be able to run normal analog channel at full speed*/
 #include "LIS3DHTR.h"
 #include <Wire.h>
 LIS3DHTR<TwoWire> LIS; //IIC
+float I2CMax=16;
 #define WIRE Wire
 
-int I2Cdata[16];
+volatile int I2Cdata[16];
 #endif
+
+/*BURSTRATE should be derivble from 1M clock*/
+#ifdef HISPEED
+#define BURSTRATE 40000
+#undef HIRES
+#else
+#ifdef HIRES
+#define BURSTRATE 100
+#else
+#ifdef INCLUDE_3DACC
+#define BURSTRATE 400
+#else
+#define BURSTRATE 8000
+#endif
+#endif
+#endif
+
 
 int cmd_type;
 int ADCChannelCount=1;
@@ -118,9 +139,9 @@ void loop() {
 #ifdef INCLUDE_3DACC    
     if (HaveLIS)
     {
-      I2Cdata[0]=LIS.getAccelerationX()*(32767./16.);
-      I2Cdata[1]=LIS.getAccelerationY()*(32767./16.);
-      I2Cdata[2]=LIS.getAccelerationZ()*(32767./16.);
+      I2Cdata[0]=LIS.getAccelerationX()*(32767./I2CMax);
+      I2Cdata[1]=LIS.getAccelerationY()*(32767./I2CMax);
+      I2Cdata[2]=LIS.getAccelerationZ()*(32767./I2CMax);
     }
 #endif    
   }
@@ -150,8 +171,23 @@ void InitADC(void){
                    ADC_CTRLB_RESSEL_16BIT;           // Set the ADC resolution to 16 bits
   while(ADC->STATUS.bit.SYNCBUSY);                   // Wait for synchronization  
 
+#ifdef HISPEED
+  ADC->AVGCTRL.reg = ADC_AVGCTRL_SAMPLENUM_4 |      //256 for 1 khz 128 for 2khz, 16 for 16K, lower number reduces the amplitude (see page 787 of data sheet about accumulation)
+                     ADC_AVGCTRL_ADJRES(8);
+#else
+#ifdef HIRES
+  ADC->AVGCTRL.reg = ADC_AVGCTRL_SAMPLENUM_1024 |      //256 for 1 khz 128 for 2khz, 16 for 16K, lower number reduces the amplitude (see page 787 of data sheet about accumulation)
+                     ADC_AVGCTRL_ADJRES(8);
+#else
+#ifdef INCLUDE_3DACC
+  ADC->AVGCTRL.reg = ADC_AVGCTRL_SAMPLENUM_256 |      //256 for 1 khz 128 for 2khz, 16 for 16K, lower number reduces the amplitude (see page 787 of data sheet about accumulation)
+                     ADC_AVGCTRL_ADJRES(8);
+#else
   ADC->AVGCTRL.reg = ADC_AVGCTRL_SAMPLENUM_32 |      //256 for 1 khz 128 for 2khz, 16 for 16K, lower number reduces the amplitude (see page 787 of data sheet about accumulation)
                      ADC_AVGCTRL_ADJRES(8);
+#endif                     
+#endif                     
+#endif                     
   while(ADC->STATUS.bit.SYNCBUSY);                   // Wait for synchronization  
   
   NVIC_SetPriority(ADC_IRQn, 1);    // Set the Nested Vector Interrupt Controller (NVIC) priority for the ADC to 1 (0 is the highest) 
@@ -160,7 +196,7 @@ void InitADC(void){
   ADC->CTRLA.bit.ENABLE = 1;                         // Enable the ADC
   while(ADC->STATUS.bit.SYNCBUSY);                   // Wait for synchronization
 
-  ADCPacer_Timer.initialize(125);    // The base burst throughput rate is 8000s/s and this is the skew between channels
+  ADCPacer_Timer.initialize(1000000/BURSTRATE);    // The base burst throughput rate is 40000s/s and this is the skew between channels
   ADCPacer_Timer.attachInterrupt(adcPacer_isr);
 
   findTrueSampleRate(RequestedSampleRate);
@@ -181,7 +217,7 @@ void InitADC(void){
 void adcPacer_isr() { 
   if  (dqScanning)
     ADC->SWTRIG.bit.START = 1;                         // Initiate a software trigger to start an ADC conversion
-} 
+}
 
 void ADC_Handler()
 {
@@ -192,6 +228,9 @@ void ADC_Handler()
   if (ADC->INTFLAG.bit.RESRDY)                       // Check if the result ready (RESRDY) flag has been set
   { 
     fadc_reg=(long)ADC->RESULT.reg;  
+#ifdef HISPEED
+    fadc_reg=fadc_reg<<2;
+#endif
 
     /*digital calibration*/
     fadc_reg = fadc_reg-DQ_MIDPOINT+(long)dqCal.adc_offset[channellist[ch]][0];
@@ -202,7 +241,7 @@ void ADC_Handler()
     else if (fadc_reg<DQ_FLOOR)fadc_reg=DQ_FLOOR;
 
     adcAve[ch]+=fadc_reg;
-    
+
     if (adcDecCounter[ch]!=0){
       adcDecCounter[ch]--;
       ch++;
@@ -212,22 +251,28 @@ void ADC_Handler()
     else{
       /*We have the data now*/
       adcDecCounter[ch]=adcDec;
-      
+#ifndef HIRES      
       fadc_reg=adcAve[ch]/(adcDec1);
-
+#endif
       adcAve[ch]=0;
 
       #ifdef INCLUDE_3DACC
       if ((channellist[ch]&0xF)>=MAXADCHANNEL){
          /*We are dealing with artificial channels*/
-         fadc_reg=I2Cdata[(channellist[ch]&0xF)-MAXADCHANNEL];
+         fadc_reg=I2Cdata[(channellist[ch]&0x7)-MAXADCHANNEL];
       }
       #endif
       
       ImdADCdata[ch]=fadc_reg;
       
       if (dqWindaq){
+#ifdef HISPEED
+        fadc_reg=fadc_reg&0XFF80; //only 9-bit resolution for 40K
+#else        
+#ifndef HIRES
         fadc_reg=fadc_reg&0XFFF0;
+#endif        
+#endif        
         adc_reg = (int)fadc_reg;
         adc_reg=adc_reg^DQ_INVERTSIGN;
       }
@@ -295,7 +340,7 @@ void ADC_Handler()
               adc_reg=I2Cdata[channellist[(ADCChannelIdx&0xF)]-MAXADCHANNEL]^DQ_INVERTSIGN;
             #else
               adc_reg=0;
-            #endif                
+            #endif   
               ADCdata[wADCdataIdx++]=(adc_reg>>1)|1;
               ADCdata[wADCdataIdx++]=(adc_reg>>8)|1;
               if (wADCdataIdx>=ADC_BUFFER) wADCdataIdx=0;
@@ -340,14 +385,16 @@ void execCommand(int cmd)
   switch (cmd)
   {
     case DQCMD_READ:
+      SerialUSB.print(" ");
       if (dqScanning){
         imdstr[0]=0;
         for (i=0;i<ADCChannelCount;i++){
           sprintf(&imdstr[strlen(imdstr)], "%d, ", ImdADCdata[i]);
         }
-        sprintf(&imdstr[strlen(imdstr)-2], "\r");
+        sprintf(&imdstr[strlen(imdstr)-2], dqeol);
         SerialUSB.print(imdstr);
       }
+      else SerialUSB.print(dqeol);
       break;
     case DQCMD_START: //Required by Windaq
       start_stop(1);
@@ -362,17 +409,21 @@ void execCommand(int cmd)
     case DQCMD_RSAMPLERATE:   //Required by Windaq
     case DQCMD_SAMPLERATE: 
       if (dqPar1.length ()==0){
+        SerialUSB.print(" ");
         SerialUSB.print(String(TrueSampleRate, 6));
       }
       else{
         RequestedSampleRate=dqPar1.toFloat();
         TrueSampleRate=findTrueSampleRate(RequestedSampleRate);
       }
+      SerialUSB.print(dqeol);
       break;  
     case DQCMD_SLIST: //Required by Windaq
       /*Actual ADC channels are always in front, and it should not duplicated*/
       if (dqPar1.length ()==0){
+        SerialUSB.print(" ");
         SerialUSB.print(ADCChannelCount);
+        SerialUSB.print(dqeol);
         break;
       }
       i=dqPar1.toInt();
@@ -401,19 +452,24 @@ void execCommand(int cmd)
           switch ((dqPar2.toInt()>>8)&0x3){
             case 1:
               LIS.setFullScaleRange(LIS3DHTR_RANGE_8G); //Gain of 
+              I2CMax=8;
               break;
             case 2:
               LIS.setFullScaleRange(LIS3DHTR_RANGE_4G); //Gain of 
+              I2CMax=4;
               break;
             case 3:
               LIS.setFullScaleRange(LIS3DHTR_RANGE_2G); //Gain of 
+              I2CMax=2;
               break;
             default:
               LIS.setFullScaleRange(LIS3DHTR_RANGE_16G); //Gain of 
+              I2CMax=16;
               break;
           }
         }
       #endif
+      SerialUSB.print(dqeol);
       break;
     default:
       SerialUSB.print("Unsupported command:"+dqCmd);
@@ -456,12 +512,12 @@ float findTrueSampleRate (float f)
   if (f<0.2)f=0.2;
 
   if (ActualChannelCount==0)ActualChannelCount=1;
-  long temp=(long)(8000./(f*(float)ActualChannelCount));
+  long temp=(long)(BURSTRATE/(f*(float)ActualChannelCount));
 
   if (temp<1)temp=1;
   if (temp>60000)temp=60000;
 
-  r=8000/(((float)temp*(float)ActualChannelCount));
+  r=BURSTRATE/(((float)temp*(float)ActualChannelCount));
 
   adcDec1=temp;
   temp=temp-1;

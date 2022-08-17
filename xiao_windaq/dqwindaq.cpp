@@ -44,6 +44,7 @@ const String dqChannel[8]={
   "Deg, -275, 1450"
 };
 
+/*GainFlags: {1,2,4,5,8,10,16,20,32,40,50,64,80,100,128,200,256,400,500,512,800,1000,1024,2000,2048,4000,5000,10000,20000,50000,100000,1000000}*/
 const int dqGain[8]={
   1,1,1,1,7,7,7,1
 };
@@ -85,8 +86,10 @@ int dqReceiveChar (int c)
       state=10;
     }
     else {
-      if (!dqScanning)
-        SerialUSB.write(c);
+      if (!dqScanning){
+        if (c!=0xD) SerialUSB.write(c);
+        //else SerialUSB.write(" ");
+      }
       else if (c=='S')  {
         dqScanning=false;
         SerialUSB.write(c);
@@ -286,13 +289,16 @@ int dqLegacyCommand(int cmd)
       cmd=DQCMD_HANDLED;
       break;
     case DQCMD_ENCODE:
+      SerialUSB.print(" ");
       if (dqPar1.length ()==0){
         break;
       }    
       dqMode=dqPar1.toInt()&0xff;
+      SerialUSB.print(dqeol);
       cmd=DQCMD_HANDLED;
       break;
     case DQCMD_RCHN:
+      SerialUSB.print(" ");
       if (dqPar1.length ()==0){
         SerialUSB.print(dqTotalChannel);
       }
@@ -303,11 +309,13 @@ int dqLegacyCommand(int cmd)
       cmd=DQCMD_HANDLED;
       break;    
     case DQCMD_GGRP:
+      SerialUSB.print(" ");
       SerialUSB.print(dqGainGroup);  
       SerialUSB.print(dqeol);
       cmd=DQCMD_HANDLED;
       break;    
     case DQCMD_RGAIN:
+      SerialUSB.print(" ");
       for (i=0; i<dqTotalChannel; i++){
         SerialUSB.print(dqGain[i]);
         SerialUSB.print(" ");
@@ -316,6 +324,7 @@ int dqLegacyCommand(int cmd)
       cmd=DQCMD_HANDLED;
       break;
     case DQCMD_INFO:
+      SerialUSB.print(" ");
       if (dqPar1.length ()==0){
         break;
       }
@@ -375,6 +384,7 @@ int dqLegacyCommand(int cmd)
         break;
 			}    
       cmd=DQCMD_HANDLED;
+      SerialUSB.print(dqeol);
       break;
     case DQCMD_SCALE:  
       if ((dqPar1.length ()==0)||(dqPar2.length ()==0)||(dqPar3.length ()==0)){
@@ -385,7 +395,8 @@ int dqLegacyCommand(int cmd)
       j=dqPar2.toInt();
       if (((i>=0)&&(i<8))&&((j>=0)&&(j<4)))
         dqCal.adc_scale[i][j]=dqPar3.toInt();
-      cmd=DQCMD_HANDLED;        
+      cmd=DQCMD_HANDLED;       
+      SerialUSB.print(dqeol);
       break;    
     case DQCMD_OFFSET:
       if ((dqPar1.length ()==0)||(dqPar2.length ()==0)||(dqPar3.length ()==0)){
@@ -397,8 +408,10 @@ int dqLegacyCommand(int cmd)
       if (((i>=0)&&(i<8))&&((j>=0)&&(j<4)))
         dqCal.adc_offset[i][j]=dqPar3.toInt();
       cmd=DQCMD_HANDLED;
+      SerialUSB.print(dqeol);
       break;
     case DQCMD_WFLASH:  
+      SerialUSB.print(" ");
       if (dqPar1.length ()>0){
         i=dqPar1.toInt();
         if ((i>=2)&&(i<sizeof(dqCal))){ /*The first two bytes are structure rev*/
@@ -413,9 +426,9 @@ int dqLegacyCommand(int cmd)
           }
           EEPROM.commit();
           SerialUSB.print("Done");
-          SerialUSB.print(dqeol);
         }
       }
+      SerialUSB.print(dqeol);
       cmd=DQCMD_HANDLED;
       break;
     case DQCMD_DOUT:
@@ -441,7 +454,7 @@ int dqLegacyCommand(int cmd)
         SerialUSB.print(" ");
         SerialUSB.print(pc[i]);
       }
-      SerialUSB.print("\r");
+      SerialUSB.print(dqeol);
       cmd=DQCMD_HANDLED;
       break; 
     case DQCMD_STREAM:
@@ -449,6 +462,7 @@ int dqLegacyCommand(int cmd)
       cmd=DQCMD_HANDLED;
       break; 
     case DQCMD_CJCDELTA:
+      SerialUSB.print(" ");
       SerialUSB.print("NA");
       SerialUSB.print(dqeol);
       cmd=DQCMD_HANDLED;

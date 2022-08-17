@@ -142,7 +142,7 @@
 
 /*Norminal digital calibration constants for DATAQ's DI-188, if you use Arduino module, please change it to 16384 and 0*/
 #define DQDEFAUL_SCALE            18850
-#define DQDEFAUL_OFFSET           55
+#define DQDEFAUL_OFFSET           0
 
 /*Calibration constants*/
 #define DQBASE_SCALE              16384
