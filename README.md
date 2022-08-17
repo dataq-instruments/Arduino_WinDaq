@@ -17,6 +17,7 @@ Originated from our DI-188, this open source project turns any **Arduino®** (Ar
 4) Restart Arduino IDE 
 5) Now you can compile and upload the firmware
 6) To download WinDaq, please click [www.dataq.com](https://www.dataq.com/products/windaq/). WinDaq is a proprietary commercial software from DATAQ, and it allows free personal home use only under this Arduino project. 
+7) Only the base project is maintain regulary. If you have trouble using the other sketches, please compare it with base
 
 **DI-188 Projects to interface with various sensors and other applications**
 1) 3-axis digital accelerometer LIS3DHTR (See demo screen shot below)
