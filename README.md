@@ -42,7 +42,7 @@ Originated from our DI-188, this open source project turns any **Arduino®** (Ar
     - Push Code button and select Download ZIP
     - From Arduino IED, follow ArduinoIDE->Sketch->Include Library->Add ZIP Library... to add the downloaded library from above step
     - DPS module should be connected to a I2C port of DI-188
-4) DI-188, along with this open source project, is now supported by a turn-key software package to facilitate the study of seismological concepts in middle school through introductory undergraduate classrooms
+4) [DI-188](https://www.dataq.com/products/di-188/), along with this open source project, is now supported by a turn-key software package to facilitate the study of seismological concepts in middle school through introductory undergraduate classrooms
     - Download and run the software from https://www.iris.edu/hq/inclass/software-web-app/jamaseis
 5) Higher speed version
     - The source is included in the base project
