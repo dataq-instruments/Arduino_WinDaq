@@ -18,7 +18,7 @@ Originated from our DI-188, this open source project turns any **Arduino®** (Ar
 5) Now you can compile and upload the firmware
 6) To download WinDaq, please click [www.dataq.com](https://www.dataq.com/products/windaq/). WinDaq is a proprietary commercial software from DATAQ, and it allows free personal home use only under this Arduino project. 
 
-**DI-188 Projects to interface with various sensors**
+**DI-188 Projects to interface with various sensors and other applications**
 1) 3-axis digital accelerometer LIS3DHTR (See demo screen shot below)
     - Range: +/-2,4,8,16G
     - The source is included in the base project
@@ -43,7 +43,15 @@ Originated from our DI-188, this open source project turns any **Arduino®** (Ar
     - DPS module should be connected to a I2C port of DI-188
 4) A turn-key software package to facilitate the study of seismological concepts in middle school through introductory undergraduate classrooms
     - Download and run the software from https://www.iris.edu/hq/inclass/software-web-app/jamaseis
-
+5) Higher speed version
+    - The source is included in the base project
+    - Uncomment #define HISPEED
+    - The max throughput rate will be raised to 40K s/s, but resolution will be lowered to 9 bit due to noise in ADC
+6) Higher resolution version
+    - The source is included in the base project
+    - Uncomment #define HIRES
+    - The resolution will be increased to 14 bit, but the max throughput rate will be lowered to 100s/s
+    
 **Warning: the input voltage for plain Arduino® modules is limited to only 0-3V!**
 
 **Need industry-grade front end of +/-10V range (30V Max) with 1MΩ input impedance? Please consider our XIAO-based starter kit [DI-188](https://www.dataq.com/products/di-188/)**
