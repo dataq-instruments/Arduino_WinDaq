@@ -9,3 +9,5 @@ An utility to calibrate the offset and scale of DI-188
 7. Click the button "Start to calibrate"
 8. Once the app collect 50 sects of data, it will pause and calibrate the scale of DI-188
 9. If the scaling is outside of the range, the software will reject the result
+
+FYI: The calibration is stored in the flash memory of DI-188, each time a new program is flashed in, the calibration will be erased. The write cycles of DI-188 is about 10000 times
