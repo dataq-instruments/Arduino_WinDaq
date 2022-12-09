@@ -16,11 +16,12 @@ Originated from our DI-188, this open source project turns any **Arduino®** (Ar
     - From Arduino IDE, follow ArduinoIDE->Sketch->Include Library->Add ZIP Library... to add the downloaded library from above step
 4) Download the source from above (press the button <> Code and download ZIP file
 5) Copy the file folders inside the source ZIP file to your arduino IDE's file folder (default folder is ThisPC->Documents->Arduino)
-6) Restart Arduino IDE 
+6) Restart Arduino IDE
 7) From Arduino IDE, use File->Open... to open a project
-8) Now you can compile and upload the firmware 
-9) To download WinDaq, please click [www.dataq.com](https://www.dataq.com/products/windaq/). WinDaq is a proprietary commercial software from DATAQ, and it allows free personal home use only under this Arduino project. 
-10) Only the [XIAO_WINDAQ base project](https://github.com/dataq-instruments/Arduino_WinDaq/tree/main/xiao_windaq) is maintained regulary. If you have trouble using the other sketches, please compare it with base
+8) Make sure Arduino IDE->Tools->Boards points to Seeed SAM boards->Seeeduino XIAO
+9) Now you can compile and upload the firmware 
+10) To download WinDaq, please click [www.dataq.com](https://www.dataq.com/products/windaq/). WinDaq is a proprietary commercial software from DATAQ, and it allows free personal home use only under this Arduino project. 
+11) Only the [XIAO_WINDAQ base project](https://github.com/dataq-instruments/Arduino_WinDaq/tree/main/xiao_windaq) is maintained regulary. If you have trouble using the other sketches, please compare it with base
 
 **DI-188 Projects to interface with various sensors and other applications**
 1) 3-axis digital accelerometer LIS3DHTR (See demo screen shot below)
