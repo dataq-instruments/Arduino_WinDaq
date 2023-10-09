@@ -51,7 +51,7 @@ Originated from our DI-188, this open source project turns any **Arduino®** (Ar
 5) Higher speed version
     - The source is included in the base project
     - Uncomment #define HISPEED
-    - The max throughput rate will be raised to 40K s/s, but resolution will be lowered to 9 bit due to noise in ADC
+    - The burst rate will be raised to 40K s/s with max throughput rate of 20K s/s, but resolution will be lowered to 9 bit due to noise in ADC
 6) Higher resolution version
     - The source is included in the base project
     - Uncomment #define HIRES
