@@ -32,7 +32,7 @@ volatile int I2Cdata[16];
 
 /*BURSTRATE should be derivble from 1M clock*/
 #ifdef HISPEED
-#define BURSTRATE 40000
+#define BURSTRATE 20000
 #undef HIRES
 #else
 #ifdef HIRES
