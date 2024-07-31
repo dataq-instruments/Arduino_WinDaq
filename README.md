@@ -1,5 +1,5 @@
 # Arduino_To_WinDaq Chart Recorder
-Originated from our DI-188, this open source project turns any **Arduino®** (Arduino Zero is used here) or **Arduino®-compatible** module such as DI-188 to a [WinDaq](https://www.dataq.com/products/windaq/)-based data acquisition chart recorder. It supports up to 16 analog channels (4 analog channels is demonstrated in the source codes) to accept readings from on-board ADC or sensors connected to grove connectors. **It supports WinDaq addons like [FFT, Spectrogram, Smart Meters, Gauge display, various trigger modes, calculated channel](http://www.ultimaserial.com/wdspectrum.html), [XY plot](https://www.dataq.com/products/windaq/add_ons/index.htm), and [Excel link](https://www.dataq.com/products/windaq/windaqxl/product.html),**
+Originated from our DI-188, this open source project turns any **Arduino®** (Arduino Zero is used here) or **Arduino®-compatible** module such as DI-188 to a [WinDaq](https://www.dataq.com/products/windaq/)-based data acquisition chart recorder. It supports up to 16 analog channels (4 analog channels is demonstrated in the source codes) to accept readings from on-board ADC or sensors connected to grove connectors. 
 
 **To use the project:**
 1) Please [follow this instruction](https://www.arduino.cc/en/software#experimental-software) to install Arduino IDE 2.0.  
